@@ -746,8 +746,12 @@ export const SolarSystemView: React.FC = () => {
   const panelInteractionTimeRef = useRef<number>(0);
 
   // UI Panels visibility toggles (Focus sidebar & Simulation timeline)
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
-  const [isTimelineOpen, setIsTimelineOpen] = useState<boolean>(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+  );
+  const [isTimelineOpen, setIsTimelineOpen] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+  );
 
   // References for Three.js objects
   const planetMeshesRef = useRef<{ mesh: THREE.Mesh; data: PlanetData; hitMesh: THREE.Mesh }[]>([]);
@@ -2310,7 +2314,7 @@ export const SolarSystemView: React.FC = () => {
 
   // ── Planet HUD Panel ────────────────────────────────────────────────────────
   const PlanetPanel: React.FC<{ planet: PlanetData }> = ({ planet }) => (
-    <div className="absolute right-4 top-16 z-50 w-80 rounded-2xl border border-slate-700/80 bg-black/95 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-hidden animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
+    <div className="absolute right-3 sm:right-4 top-14 sm:top-16 z-50 w-[calc(100vw-1.5rem)] sm:w-84 max-w-sm rounded-2xl border border-slate-700/80 bg-black/95 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-hidden max-h-[85vh] overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
       <div
         className="relative px-5 pt-5 pb-3"
         style={{ background: `linear-gradient(135deg, #${planet.colorHex.toString(16).padStart(6, '0')}32, transparent)` }}
@@ -2395,7 +2399,7 @@ export const SolarSystemView: React.FC = () => {
 
   // ── Minor Body (Asteroid / Dwarf Planet) Telemetry Card ─────────────────────
   const MinorBodyPanel: React.FC<{ body: MinorBodyData }> = ({ body }) => (
-    <div className="absolute right-4 top-16 z-50 w-84 rounded-2xl border border-amber-500/60 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(245,158,11,0.25)] overflow-hidden animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
+    <div className="absolute right-3 sm:right-4 top-14 sm:top-16 z-50 w-[calc(100vw-1.5rem)] sm:w-84 max-w-sm rounded-2xl border border-amber-500/60 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(245,158,11,0.25)] overflow-hidden max-h-[85vh] overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
       <div className="px-5 pt-4 pb-3 bg-gradient-to-r from-amber-950/40 to-space-950 border-b border-amber-500/30">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -2445,7 +2449,7 @@ export const SolarSystemView: React.FC = () => {
 
   // ── Comet Telemetry Card ────────────────────────────────────────────────────
   const CometPanel: React.FC<{ comet: CometData }> = ({ comet }) => (
-    <div className="absolute right-4 top-16 z-50 w-84 rounded-2xl border border-cyan-400/70 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(6,182,212,0.3)] overflow-hidden animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
+    <div className="absolute right-3 sm:right-4 top-14 sm:top-16 z-50 w-[calc(100vw-1.5rem)] sm:w-84 max-w-sm rounded-2xl border border-cyan-400/70 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(6,182,212,0.3)] overflow-hidden max-h-[85vh] overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
       <div className="px-5 pt-4 pb-3 bg-gradient-to-r from-cyan-950/50 to-space-950 border-b border-cyan-500/30">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -2489,7 +2493,7 @@ export const SolarSystemView: React.FC = () => {
 
   // ── Planetary Moon Telemetry Card ───────────────────────────────────────────
   const MoonPanel: React.FC<{ moon: DetailedMoonData }> = ({ moon }) => (
-    <div className="absolute right-4 top-16 z-50 w-84 rounded-2xl border border-blue-400/60 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(59,130,246,0.25)] overflow-hidden animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
+    <div className="absolute right-3 sm:right-4 top-14 sm:top-16 z-50 w-[calc(100vw-1.5rem)] sm:w-84 max-w-sm rounded-2xl border border-blue-400/60 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(59,130,246,0.25)] overflow-hidden max-h-[85vh] overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
       <div className="px-5 pt-4 pb-3 bg-gradient-to-r from-blue-950/40 to-space-950 border-b border-blue-500/30">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -2532,7 +2536,7 @@ export const SolarSystemView: React.FC = () => {
 
   // ── Spacecraft / Probe Telemetry Card ───────────────────────────────────────
   const SpacecraftPanel: React.FC<{ probe: SpacecraftData }> = ({ probe }) => (
-    <div className="absolute right-4 top-16 z-50 w-84 rounded-2xl border border-purple-400/60 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(168,85,247,0.25)] overflow-hidden animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
+    <div className="absolute right-3 sm:right-4 top-14 sm:top-16 z-50 w-[calc(100vw-1.5rem)] sm:w-84 max-w-sm rounded-2xl border border-purple-400/60 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(168,85,247,0.25)] overflow-hidden max-h-[85vh] overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300 pointer-events-auto">
       <div className="px-5 pt-4 pb-3 bg-gradient-to-r from-purple-950/40 to-space-950 border-b border-purple-500/30">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -2589,7 +2593,7 @@ export const SolarSystemView: React.FC = () => {
 
   // ── Sun Telemetry Reconnaissance Card ───────────────────────────────────────
   const SunPanel: React.FC = () => (
-    <div className="absolute right-4 top-16 z-50 w-88 rounded-2xl border border-amber-500/70 bg-black/95 backdrop-blur-xl shadow-[0_0_50px_rgba(245,158,11,0.35)] overflow-hidden animate-in slide-in-from-right-4 fade-in duration-300 font-sans pointer-events-auto">
+    <div className="absolute right-3 sm:right-4 top-14 sm:top-16 z-50 w-[calc(100vw-1.5rem)] sm:w-88 max-w-sm rounded-2xl border border-amber-500/70 bg-black/95 backdrop-blur-xl shadow-[0_0_50px_rgba(245,158,11,0.35)] overflow-hidden max-h-[85vh] overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300 font-sans pointer-events-auto">
       <div className="relative px-5 pt-4 pb-3 bg-gradient-to-r from-amber-950/60 via-orange-950/40 to-space-950 border-b border-amber-500/40">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -2675,7 +2679,7 @@ export const SolarSystemView: React.FC = () => {
 
   // ── Mars Landing Site Reconnaissance Card ───────────────────────────────────
   const MarsLocationCard: React.FC<{ loc: MarsLocation }> = ({ loc }) => (
-    <div className="absolute left-4 top-16 z-50 w-84 rounded-2xl border border-cyan-500/70 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(0,240,255,0.3)] overflow-hidden animate-in slide-in-from-left-4 fade-in duration-300 pointer-events-auto">
+    <div className="absolute left-3 sm:left-4 top-14 sm:top-16 z-50 w-[calc(100vw-1.5rem)] sm:w-84 max-w-sm rounded-2xl border border-cyan-500/70 bg-black/95 backdrop-blur-xl shadow-[0_0_45px_rgba(0,240,255,0.3)] overflow-hidden max-h-[85vh] overflow-y-auto animate-in slide-in-from-left-4 fade-in duration-300 pointer-events-auto">
       <div className="relative px-5 pt-4 pb-3 bg-gradient-to-r from-cyan-950/50 to-space-950 border-b border-cyan-500/30">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -2750,33 +2754,33 @@ export const SolarSystemView: React.FC = () => {
 
       {/* Top HUD Bar */}
       <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none">
-        <div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-b from-black/90 via-black/60 to-transparent">
+        <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3.5 bg-gradient-to-b from-black/90 via-black/60 to-transparent">
           <button
             onClick={() => navigate('/')}
-            className="pointer-events-auto flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-black/75 hover:bg-black border border-white/10 hover:border-white/30 text-slate-300 hover:text-white text-xs font-mono transition-all backdrop-blur-md shadow-lg cursor-pointer"
+            className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-black/75 hover:bg-black border border-white/10 hover:border-white/30 text-slate-300 hover:text-white text-xs font-mono transition-all backdrop-blur-md shadow-lg cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back to Mars Farm
+            <span>Back<span className="hidden sm:inline"> to Mars Farm</span></span>
           </button>
 
           <div className="flex flex-col items-center">
-            <p className="text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest flex items-center gap-1.5">
+            <p className="hidden md:flex text-[10px] font-mono text-cyan-400/80 uppercase tracking-widest items-center gap-1.5">
               <Compass className="w-3 h-3" />
               NASA JPL Heliocentric Ephemeris · Planetary & Minor Bodies
             </p>
-            <h1 className="text-sm font-extrabold font-display text-white tracking-widest">
+            <h1 className="text-xs sm:text-sm font-extrabold font-display text-white tracking-wider sm:tracking-widest whitespace-nowrap">
               SOLAR SYSTEM EXPLORER
             </h1>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             {/* Orbit Motion Toggle */}
             <button
               onClick={() => {
                 isOrbitPausedRef.current = !isOrbitPausedRef.current;
                 setIsOrbitPaused(!isOrbitPaused);
               }}
-              className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/75 border border-white/10 hover:border-white/30 text-xs font-mono text-slate-300 hover:text-white transition-all backdrop-blur-md cursor-pointer"
+              className="pointer-events-auto flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-black/75 border border-white/10 hover:border-white/30 text-xs font-mono text-slate-300 hover:text-white transition-all backdrop-blur-md cursor-pointer"
               title="Pause/Resume Orbital Motion"
             >
               {isOrbitPaused ? <Play className="w-3 h-3 text-green-400" /> : <Pause className="w-3 h-3 text-yellow-400" />}
@@ -2784,10 +2788,11 @@ export const SolarSystemView: React.FC = () => {
             </button>
 
             {/* NASA API Status */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/75 border border-white/10 text-xs font-mono backdrop-blur-md">
+            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-xl bg-black/75 border border-white/10 text-xs font-mono backdrop-blur-md">
               <span className={`w-2 h-2 rounded-full ${dataStatus === 'live' ? 'bg-green-400 animate-ping' : 'bg-cyan-400'}`} />
-              <span className="text-slate-400 font-mono text-[11px]">
-                {dataStatus === 'loading' ? 'CALCULATING...' : dataStatus === 'live' ? 'LIVE NASA JPL API' : 'NASA KEPLERIAN DATA'}
+              <span className="text-slate-400 font-mono text-[10px] sm:text-[11px]">
+                <span className="sm:hidden">{dataStatus === 'loading' ? 'CALC' : dataStatus === 'live' ? 'LIVE' : 'KEPLER'}</span>
+                <span className="hidden sm:inline">{dataStatus === 'loading' ? 'CALCULATING...' : dataStatus === 'live' ? 'LIVE NASA JPL API' : 'NASA KEPLERIAN DATA'}</span>
               </span>
             </div>
           </div>
@@ -2795,10 +2800,10 @@ export const SolarSystemView: React.FC = () => {
       </div>
 
       {/* Target Focus Indicator Badge */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-        <div className="px-4 py-1.5 rounded-full bg-black/85 border border-cyan-500/40 text-xs font-mono text-cyan-300 backdrop-blur-md shadow-[0_0_20px_rgba(0,240,255,0.25)] flex items-center gap-2">
-          <Focus className="w-3.5 h-3.5 text-cyan-400" />
-          <span>
+      <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-[85vw] hidden md:flex">
+        <div className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-black/85 border border-cyan-500/40 text-[10px] sm:text-xs font-mono text-cyan-300 backdrop-blur-md shadow-[0_0_20px_rgba(0,240,255,0.25)] flex items-center gap-1.5 sm:gap-2 truncate">
+          <Focus className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-cyan-400 flex-shrink-0" />
+          <span className="truncate">
             {focusedBodyId
               ? `Tracking: ${focusedBodyId === 'sun' ? '☀️ Sun (Solar Center)' : focusedBodyId.toUpperCase()}`
               : '🔭 Free Scan Mode (Camera Unlocked)'}
@@ -2807,42 +2812,42 @@ export const SolarSystemView: React.FC = () => {
       </div>
 
       {/* Layer Visibility Toggles (Top Right Floating) */}
-      <div className="absolute top-16 right-4 z-20 flex items-center gap-1.5 p-1 rounded-xl bg-black/80 border border-white/10 backdrop-blur-md">
+      <div className="absolute top-14 sm:top-16 right-2 sm:right-4 z-20 flex items-center gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded-xl bg-black/80 border border-white/10 backdrop-blur-md max-w-[94vw] overflow-x-auto scrollbar-none">
         <button
           onClick={() => setLayers(l => ({ ...l, asteroids: !l.asteroids }))}
-          className={`px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer ${
+          className={`px-1.5 sm:px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer whitespace-nowrap ${
             layers.asteroids ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50' : 'text-slate-500 hover:text-slate-300'
           }`}
           title="Toggle Main Asteroid Belt & Trojans"
         >
-          🪨 Asteroids
+          🪨 <span className="hidden sm:inline">Asteroids</span><span className="sm:hidden">Ast</span>
         </button>
         <button
           onClick={() => setLayers(l => ({ ...l, comets: !l.comets }))}
-          className={`px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer ${
+          className={`px-1.5 sm:px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer whitespace-nowrap ${
             layers.comets ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/50' : 'text-slate-500 hover:text-slate-300'
           }`}
           title="Toggle Famous Comets with Solar Wind Tails"
         >
-          ☄️ Comets
+          ☄️ <span className="hidden sm:inline">Comets</span><span className="sm:hidden">Com</span>
         </button>
         <button
           onClick={() => setLayers(l => ({ ...l, moons: !l.moons }))}
-          className={`px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer ${
+          className={`px-1.5 sm:px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer whitespace-nowrap ${
             layers.moons ? 'bg-blue-500/25 text-blue-300 border border-blue-500/50' : 'text-slate-500 hover:text-slate-300'
           }`}
           title="Toggle Planetary Moons (Galilean, Phobos, Titan, Triton, etc.)"
         >
-          🪐 Moons
+          🪐 <span className="hidden sm:inline">Moons</span><span className="sm:hidden">Moon</span>
         </button>
         <button
           onClick={() => setLayers(l => ({ ...l, probes: !l.probes }))}
-          className={`px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer ${
+          className={`px-1.5 sm:px-2 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer whitespace-nowrap ${
             layers.probes ? 'bg-purple-500/25 text-purple-300 border border-purple-500/50' : 'text-slate-500 hover:text-slate-300'
           }`}
           title="Toggle Deep Space Probes & JWST at L2"
         >
-          🛰️ Probes
+          🛰️ <span className="hidden sm:inline">Probes</span><span className="sm:hidden">Probe</span>
         </button>
       </div>
 
@@ -2886,7 +2891,7 @@ export const SolarSystemView: React.FC = () => {
 
       {/* ── Floating Milestone Alert Hologram Toast ─────────────────────────── */}
       {activeMilestone && (
-        <div className="absolute bottom-52 left-1/2 -translate-x-1/2 z-40 max-w-lg w-[92%] rounded-2xl bg-black/95 border border-cyan-500/60 p-4 shadow-[0_0_40px_rgba(6,182,212,0.35),0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-2xl animate-in slide-in-from-bottom-3 fade-in duration-250">
+        <div className="absolute bottom-20 sm:bottom-52 left-1/2 -translate-x-1/2 z-40 max-w-lg w-[94%] sm:w-[92%] rounded-2xl bg-black/95 border border-cyan-500/60 p-3.5 sm:p-4 shadow-[0_0_40px_rgba(6,182,212,0.35),0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-2xl max-h-[50vh] overflow-y-auto animate-in slide-in-from-bottom-3 fade-in duration-250">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
               <span className="text-3xl flex-shrink-0 drop-shadow-md">{activeMilestone.badge}</span>
@@ -2935,7 +2940,7 @@ export const SolarSystemView: React.FC = () => {
 
       {/* ── Timeline Simulation Control Panel (Scrubber & Speeds) ──────────────── */}
       {isTimelineOpen ? (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 w-[96%] max-w-4xl px-4 py-2.5 rounded-2xl bg-black/92 border border-cyan-500/35 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.15)] flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="absolute bottom-14 sm:bottom-16 left-1/2 -translate-x-1/2 z-30 w-[96%] max-w-4xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-black/92 border border-cyan-500/35 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.15)] flex flex-col gap-1.5 sm:gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
           {/* Top Edge Collapse Tab */}
           <button
             onClick={() => setIsTimelineOpen(false)}
@@ -2950,63 +2955,63 @@ export const SolarSystemView: React.FC = () => {
           <div className="flex items-center justify-between gap-2 flex-wrap">
             {/* Current Date & Roman Epoch */}
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-cyan-950/70 border border-cyan-500/40 text-cyan-400">
-                <Calendar className="w-4 h-4" />
+              <div className="p-1 sm:p-1.5 rounded-lg bg-cyan-950/70 border border-cyan-500/40 text-cyan-400">
+                <Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-extrabold font-mono tracking-wider text-white">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="text-xs sm:text-sm font-extrabold font-mono tracking-wider text-white">
                     {formatSimDate(displayYear).formatted}
                   </span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-bold">
+                  <span className="text-[9px] sm:text-[10px] font-mono px-1 sm:px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-bold">
                     {formatSimDate(displayYear).epochStr}
                   </span>
                 </div>
-                <p className="text-[10px] font-mono text-slate-400">
-                  {displayYear >= 2026.5 ? '🔴 Active Exploration Epoch' : displayYear >= 1957 ? '🚀 Space Age & Satellites' : '🔭 Early Astronomy Era'}
+                <p className="text-[9px] sm:text-[10px] font-mono text-slate-400 hidden xs:block">
+                  {displayYear >= 2026.5 ? '🔴 Active Exploration' : displayYear >= 1957 ? '🚀 Space Age' : '🔭 Early Astronomy'}
                 </p>
               </div>
             </div>
 
             {/* Primary Playback Controls */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5">
               <button
                 onClick={() => stepSimulation(-5)}
-                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer"
+                className="hidden xs:inline-flex px-1.5 sm:px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-[11px] sm:text-xs font-mono transition-all cursor-pointer"
                 title="Step -5 Years"
               >
                 -5y
               </button>
               <button
                 onClick={() => stepSimulation(-1)}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all cursor-pointer"
+                className="p-1 sm:p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all cursor-pointer"
                 title="Step -1 Year"
               >
-                <Rewind className="w-3.5 h-3.5" />
+                <Rewind className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
               </button>
 
               <button
                 onClick={togglePlaySimulation}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-mono text-xs font-bold transition-all shadow-md cursor-pointer ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border font-mono text-xs font-bold transition-all shadow-md cursor-pointer ${
                   isSimPlaying
                     ? 'bg-amber-500/25 text-amber-300 border-amber-500/70 shadow-[0_0_14px_rgba(245,158,11,0.4)]'
                     : 'bg-cyan-500/25 text-cyan-300 border-cyan-500/70 hover:bg-cyan-500/35 shadow-[0_0_14px_rgba(6,182,212,0.4)]'
                 }`}
               >
-                {isSimPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+                {isSimPlaying ? <Pause className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-current" /> : <Play className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-current" />}
                 <span>{isSimPlaying ? 'Pause' : 'Simulate'}</span>
               </button>
 
               <button
                 onClick={() => stepSimulation(1)}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all cursor-pointer"
+                className="p-1 sm:p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all cursor-pointer"
                 title="Step +1 Year"
               >
-                <FastForward className="w-3.5 h-3.5" />
+                <FastForward className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
               </button>
               <button
                 onClick={() => stepSimulation(5)}
-                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-mono transition-all cursor-pointer"
+                className="hidden xs:inline-flex px-1.5 sm:px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-[11px] sm:text-xs font-mono transition-all cursor-pointer"
                 title="Step +5 Years"
               >
                 +5y
@@ -3014,17 +3019,17 @@ export const SolarSystemView: React.FC = () => {
             </div>
 
             {/* Speed Adjusters, Strict Mode, & Minimize */}
-            <div className="flex items-center gap-1.5">
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
-                <span className="text-[10px] font-mono text-slate-400 px-1 flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-cyan-400" />
-                  <span>Speed:</span>
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <div className="flex items-center gap-0.5 sm:gap-1 p-0.5 sm:p-1 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 px-0.5 sm:px-1 flex items-center gap-1">
+                  <Clock className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-cyan-400" />
+                  <span className="hidden sm:inline">Speed:</span>
                 </span>
                 {[1, 3, 5, 10, 30].map(s => (
                   <button
                     key={s}
                     onClick={() => handleSpeedChange(s)}
-                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                    className={`px-1 sm:px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold transition-all cursor-pointer ${
                       simSpeedSecPerYear === s
                         ? 'bg-cyan-500 text-black shadow-[0_0_8px_rgba(6,182,212,0.7)]'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
@@ -3039,7 +3044,7 @@ export const SolarSystemView: React.FC = () => {
               {/* Strict Discovery Mode Toggle */}
               <button
                 onClick={toggleStrictTimeline}
-                className={`px-2 py-1 rounded-xl border text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                className={`px-1.5 sm:px-2 py-1 rounded-xl border text-[9px] sm:text-[10px] font-mono font-bold transition-all cursor-pointer ${
                   strictTimelineMode
                     ? 'bg-emerald-500/25 border-emerald-500/60 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
                     : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200'
@@ -3078,22 +3083,22 @@ export const SolarSystemView: React.FC = () => {
             </div>
 
             {/* Scrubber Year Bounds */}
-            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 px-0.5">
-              <span>1950 Dawn</span>
-              <span>1977 Voyager</span>
-              <span>1986 Halley</span>
-              <span>1998 ISS</span>
-              <span>2015 Pluto</span>
-              <span className="text-cyan-400 font-bold">2026 Present</span>
-              <span className="text-amber-400 font-bold">2029 Apophis</span>
+            <div className="flex justify-between items-center text-[9px] sm:text-[10px] font-mono text-slate-500 px-0.5">
+              <span>1950<span className="hidden sm:inline"> Dawn</span></span>
+              <span className="hidden md:inline">1977 Voyager</span>
+              <span>1986<span className="hidden sm:inline"> Halley</span></span>
+              <span className="hidden md:inline">1998 ISS</span>
+              <span className="hidden md:inline">2015 Pluto</span>
+              <span className="text-cyan-400 font-bold">2026<span className="hidden sm:inline"> Present</span></span>
+              <span className="text-amber-400 font-bold">2029<span className="hidden sm:inline"> Apophis</span></span>
             </div>
           </div>
 
           {/* Milestone Quick-Jump Rail */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin scrollbar-thumb-slate-800">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin scrollbar-thumb-slate-800 touch-pan-x">
             <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider flex-shrink-0 flex items-center gap-1">
               <History className="w-3 h-3 text-cyan-400" />
-              <span>Milestones:</span>
+              <span className="hidden sm:inline">Milestones:</span>
             </span>
             {KEY_TIMELINE_PRESETS.map(preset => {
               const isNear = Math.abs(displayYear - preset.year) <= 0.6;
@@ -3104,7 +3109,7 @@ export const SolarSystemView: React.FC = () => {
                     handleScrubSimulation(preset.year);
                     if (preset.bodyId) focusOnBody(preset.bodyId);
                   }}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono whitespace-nowrap transition-all border cursor-pointer flex-shrink-0 ${
+                  className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono whitespace-nowrap transition-all border cursor-pointer flex-shrink-0 ${
                     isNear
                       ? 'bg-cyan-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_10px_rgba(6,182,212,0.45)] font-bold'
                       : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
@@ -3117,30 +3122,30 @@ export const SolarSystemView: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <div className="absolute bottom-12 sm:bottom-14 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
           <button
             onClick={() => setIsTimelineOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/90 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white backdrop-blur-xl shadow-[0_0_25px_rgba(0,240,255,0.25)] transition-all text-xs font-mono font-bold cursor-pointer animate-in fade-in"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-black/90 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white backdrop-blur-xl shadow-[0_0_25px_rgba(0,240,255,0.25)] transition-all text-[11px] sm:text-xs font-mono font-bold cursor-pointer animate-in fade-in"
             title="Open Simulation Timeline"
           >
-            <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+            <Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-cyan-400" />
             <span>Timeline ({formatSimDate(displayYear).year})</span>
-            <ChevronUp className="w-3.5 h-3.5 text-cyan-400" />
+            <ChevronUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-cyan-400" />
           </button>
         </div>
       )}
 
       {/* Bottom Scale Preset Switchers */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 p-1 rounded-2xl bg-black/90 border border-white/15 backdrop-blur-xl shadow-2xl">
+      <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-black/90 border border-white/15 backdrop-blur-xl shadow-2xl max-w-[96vw] overflow-x-auto scrollbar-none pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         <button
           onClick={() => focusOnBody('mars')}
-          className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+          className={`px-2 sm:px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
             focusedBodyId === 'mars'
               ? 'bg-orange-500/25 text-orange-300 border border-orange-500/70 shadow-[0_0_14px_rgba(255,77,46,0.35)]'
               : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
           }`}
         >
-          🔴 Mars Close-Up
+          🔴 Mars<span className="hidden sm:inline"> Close-Up</span>
         </button>
 
         <button
@@ -3148,13 +3153,13 @@ export const SolarSystemView: React.FC = () => {
             focusOnBody('sun');
             setScalePreset(4.5);
           }}
-          className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+          className={`px-2 sm:px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
             focusedBodyId === 'sun'
               ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/70 shadow-[0_0_14px_rgba(6,182,212,0.35)]'
               : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
           }`}
         >
-          ☀️ Inner System
+          ☀️ Inner<span className="hidden sm:inline"> System</span>
         </button>
 
         <button
@@ -3162,9 +3167,9 @@ export const SolarSystemView: React.FC = () => {
             focusOnBody('sun');
             setScalePreset(35);
           }}
-          className="px-2.5 py-1 rounded-xl text-xs font-mono font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all cursor-pointer"
+          className="px-2 sm:px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-mono font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all cursor-pointer whitespace-nowrap"
         >
-          🌌 Full Orrery (35 AU)
+          🌌 <span className="sm:hidden">35 AU</span><span className="hidden sm:inline">Full Orrery (35 AU)</span>
         </button>
 
         <button
@@ -3172,15 +3177,15 @@ export const SolarSystemView: React.FC = () => {
             focusOnBody(null);
             setScalePreset(70);
           }}
-          className="px-2.5 py-1 rounded-xl text-xs font-mono font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all cursor-pointer"
+          className="px-2 sm:px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-mono font-bold text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all cursor-pointer whitespace-nowrap"
         >
-          🛸 Deep Space (70 AU)
+          🛸 <span className="sm:hidden">70 AU</span><span className="hidden sm:inline">Deep Space (70 AU)</span>
         </button>
       </div>
 
       {/* Left Celestial Bodies & Minor Bodies Explorer Sidebar */}
       {isSidebarOpen ? (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1 pointer-events-auto max-h-[75vh] overflow-y-auto pr-1 animate-in fade-in slide-in-from-left-3 duration-200">
+        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1 pointer-events-auto max-h-[60vh] sm:max-h-[75vh] w-32 sm:w-auto overflow-y-auto pr-1 animate-in fade-in slide-in-from-left-3 duration-200">
           <div className="flex items-center justify-between px-2 mb-0.5">
             <p className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Focus Body</p>
             <button
@@ -3325,10 +3330,10 @@ export const SolarSystemView: React.FC = () => {
         </button>
       </div>
       ) : (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
+        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-black/85 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white backdrop-blur-md shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all text-xs font-mono font-bold cursor-pointer animate-in fade-in"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-black/85 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 hover:text-white backdrop-blur-md shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all text-xs font-mono font-bold cursor-pointer animate-in fade-in"
             title="Open Celestial Bodies Focus Sidebar"
           >
             <Compass className="w-4 h-4 text-cyan-400" />
@@ -3339,7 +3344,7 @@ export const SolarSystemView: React.FC = () => {
       )}
 
       {/* NASA Attribution Footer */}
-      <div className="absolute bottom-2 right-4 z-20 pointer-events-none">
+      <div className="absolute bottom-2 right-4 z-20 pointer-events-none hidden lg:block">
         <p className="text-[10px] font-mono text-slate-600">
           NASA JPL Small-Body Database & Horizons · Latest 2026 Planetary & Cometary Telemetry
         </p>
