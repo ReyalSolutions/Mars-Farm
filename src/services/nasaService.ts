@@ -283,39 +283,37 @@ function computePlanetPosition(planet: Omit<PlanetData, 'currentPositionAU' | 'd
 // ─── NASA Data Service ───────────────────────────────────────────────────────
 
 class NasaDataService {
-  private apiKey: string;
   private isLiveConnected: boolean = false;
   private planetCache: PlanetData[] | null = null;
   private planetCacheTimestamp: number = 0;
   private readonly CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_NASA_API_KEY || 'DEMO_KEY';
+    // API key is kept server-side — all NASA calls go through /api/nasa proxy
   }
 
   public async getMarsLocations(): Promise<{ locations: MarsLocation[]; status: NasaApiStatus }> {
     try {
-      if (this.apiKey && this.apiKey !== 'DEMO_KEY') {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+      // Call server-side proxy — NASA_API_KEY is never exposed to the browser
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-        const res = await fetch(`https://api.nasa.gov/insight_weather/?api_key=${this.apiKey}&feedtype=json&ver=1.0`, {
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+      const res = await fetch('/api/nasa?endpoint=insight_weather', {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
 
-        if (res.ok) {
-          this.isLiveConnected = true;
-          return {
-            locations: MARS_LOCATIONS,
-            status: {
-              isLive: true,
-              dataSourceLabel: 'LIVE NASA API',
-              lastSyncTimestamp: new Date().toLocaleTimeString(),
-              attribution: 'NASA Planetary Data System & InSight In-Situ Atmospheric Sensor Feed'
-            }
-          };
-        }
+      if (res.ok) {
+        this.isLiveConnected = true;
+        return {
+          locations: MARS_LOCATIONS,
+          status: {
+            isLive: true,
+            dataSourceLabel: 'LIVE NASA API',
+            lastSyncTimestamp: new Date().toLocaleTimeString(),
+            attribution: 'NASA Planetary Data System & InSight In-Situ Atmospheric Sensor Feed'
+          }
+        };
       }
     } catch {
       // Fallback gracefully without throwing

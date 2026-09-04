@@ -19,42 +19,35 @@ export interface AiAdvisorResponse {
   source: 'LIVE_LLM' | 'HEURISTIC_ENGINE';
 }
 
-const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-const openaiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-const activeKey = geminiKey || openaiKey;
+// Cached status updated asynchronously from the backend /api/advisor endpoint
+let cachedStatus: AiAdvisorStatus = {
+  isLive: true,
+  provider: 'OPENAI',
+  label: 'LIVE AI: SERVER ADVISOR',
+  modelName: 'gpt-4o-mini',
+};
+
+// Check backend status in background on startup
+if (typeof window !== 'undefined') {
+  fetch('/api/advisor')
+    .then(res => (res.ok ? res.json() : null))
+    .then(data => {
+      if (data && typeof data.isLive === 'boolean') {
+        cachedStatus = data;
+      }
+    })
+    .catch(() => {
+      cachedStatus = {
+        isLive: false,
+        provider: 'HEURISTIC',
+        label: 'DETERMINISTIC HEURISTIC ENGINE',
+        modelName: 'NASA AgriSim v2.6 Analytical Matrix',
+      };
+    });
+}
 
 export function getAiAdvisorStatus(): AiAdvisorStatus {
-  if (!activeKey || activeKey.trim() === '' || activeKey === 'your_key_here') {
-    return {
-      isLive: false,
-      provider: 'HEURISTIC',
-      label: 'DETERMINISTIC HEURISTIC ENGINE',
-      modelName: 'NASA AgriSim v2.6 Analytical Matrix'
-    };
-  }
-
-  if (activeKey.startsWith('sk-or-')) {
-    return {
-      isLive: true,
-      provider: 'OPENROUTER',
-      label: 'LIVE AI: MINIMAX M3',
-      modelName: 'minimax/minimax-m3:free'
-    };
-  } else if (activeKey.startsWith('AIza')) {
-    return {
-      isLive: true,
-      provider: 'GEMINI',
-      label: 'LIVE AI: GOOGLE GEMINI',
-      modelName: 'gemini-1.5-flash'
-    };
-  } else {
-    return {
-      isLive: true,
-      provider: 'OPENAI',
-      label: 'LIVE AI: OPENAI',
-      modelName: 'gpt-4o-mini'
-    };
-  }
+  return cachedStatus;
 }
 
 export async function queryFarmerAiAsync(
@@ -63,90 +56,46 @@ export async function queryFarmerAiAsync(
   projection: ResourceBalanceProjection,
   suitability?: SuitabilityBreakdown
 ): Promise<AiAdvisorResponse> {
-  const status = getAiAdvisorStatus();
+  // Query server-side API function securely without exposing keys to browser
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-  // If live key available, attempt query with 15s timeout
-  if (status.isLive && activeKey) {
-    const candidateModels = activeKey.startsWith('sk-or-')
-      ? ['minimax/minimax-m3:free', 'openai/gpt-4o-mini']
-      : ['gpt-4o-mini'];
+    const response = await fetch('/api/advisor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        question,
+        config,
+        projection,
+        suitability,
+      }),
+      signal: controller.signal,
+    });
 
-    const location = MARS_LOCATIONS.find(l => l.id === config.selectedLocationId) || MARS_LOCATIONS[0];
+    clearTimeout(timeoutId);
 
-    const systemPrompt = `You are Farmer AI, NASA's Lead Astrobiologist & Closed-Loop Agronomy Systems Architect for Mars Exploration.
-Your role is to DEEPLY ANALYZE every user prompt using rigorous NASA aerospace telemetry and botany principles.
-
-CURRENT MISSION TELEMETRY:
-- Landing Site: ${location.name} (${location.type}, Elevation: ${location.elevationKm} km, Water Potential: ${location.waterIcePotential}, Dust Risk: ${location.dustStormRisk})
-- Suitability Score: ${suitability?.overallScore || 80}/100
-- Astronaut Crew: ${config.crewSize} astronauts
-- Mission Target: ${config.missionDays} sols
-- Farm Area: ${config.farmAreaM2} m² (${projection.totalAllocatedAreaM2} m² currently cultivated, ${projection.remainingAreaM2} m² reserve)
-- Calorie Coverage: ${projection.projectedCaloricCoveragePercent}% (${projection.estimatedDailyCaloriesProducedKcal.toLocaleString()} produced vs ${projection.crewDailyCaloricRequirementKcal.toLocaleString()} kcal/day demanded)
-- Net Daily Water Drain: ${projection.netDailyWaterDrainL} L/day (Water Storage Reserve: ${config.waterReserveLiters} L)
-- Power Reserve: ${config.dailyEnergyBudgetKwh} kWh/day
-
-INSTRUCTIONS:
-1. Directly analyze the user's specific request or question.
-2. If they mention numbers (e.g. crew size, farm area, duration), run explicit mathematical and nutritional calculations.
-3. If they ask about specific crops (potatoes, lettuce, wheat, tomatoes, soybeans, carrots), compare their yield (kcal/m²), water footprint (L/kg), and growth days.
-4. Give a clear Feasibility Verdict (e.g. ✅ FEASIBLE, ⚠️ MARGINAL / HIGH RISK, ❌ CRITICAL DEFICIT).
-5. Provide 2-3 specific, actionable recommendations for their farm builder or mission strategy.
-6. Keep the format concise, well-structured, professional, with bold highlights and emojis.`;
-
-    for (const model of candidateModels) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-        const endpoint = activeKey.startsWith('sk-or-')
-          ? 'https://openrouter.ai/api/v1/chat/completions'
-          : 'https://api.openai.com/v1/chat/completions';
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${activeKey}`,
-            'HTTP-Referer': 'https://marsfarm.space',
-            'X-Title': 'MarsFarm NASA Space Apps'
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: question }
-            ],
-            max_tokens: 500,
-            temperature: 0.65
-          }),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const data = await response.json();
-          const text = data.choices?.[0]?.message?.content;
-          if (text && text.trim().length > 0) {
-            return {
-              answer: text.trim(),
-              confidence: 0.98,
-              source: 'LIVE_LLM'
-            };
-          }
-        }
-      } catch (err) {
-        console.warn(`Model ${model} query attempt failed:`, err);
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.answer && data.answer.trim().length > 0) {
+        return {
+          answer: data.answer.trim(),
+          confidence: data.confidence || 0.98,
+          source: 'LIVE_LLM',
+        };
       }
     }
+  } catch (err) {
+    console.warn('[Mars Farm] Server advisor query failed, falling back to heuristic engine:', err);
   }
 
   // Fallback to built-in deep deterministic analytical engine
   const fallback = queryFarmerAi(question, config, projection, suitability);
   return {
     ...fallback,
-    source: 'HEURISTIC_ENGINE'
+    source: 'HEURISTIC_ENGINE',
   };
 }
 
