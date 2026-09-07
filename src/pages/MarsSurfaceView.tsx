@@ -177,50 +177,61 @@ export const MarsSurfaceView: React.FC = () => {
         </div>
 
         {/* ── 4. Surface Dossier Tabs & Intel Panel ──────────────────────────── */}
-        <div className="hud-panel rounded-2xl p-4 sm:p-6 border-slate-800 space-y-6">
-          {/* Tab Navigation */}
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
-            <div className="flex items-center gap-1 sm:gap-2">
+        <div className="hud-panel rounded-2xl p-3.5 sm:p-6 border-slate-800 space-y-4 sm:space-y-6">
+          {/* Tab Navigation & PDS Verified Badge */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800/80 pb-3 gap-3">
+            {/* Scrollable / Flexible Tabs on Mobile */}
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1 -mb-1 w-full md:w-auto scroll-smooth touch-pan-x">
               <button
                 onClick={() => setActiveTab('imagery')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
+                className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 sm:gap-2 flex-shrink-0 cursor-pointer ${
                   activeTab === 'imagery'
                     ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/50 shadow-sm font-bold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>NASA High-Res Surface Imagery ({surfaceData.images.length})</span>
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                <span className="hidden sm:inline">NASA High-Res Surface Imagery</span>
+                <span className="sm:hidden">Surface Imagery</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-900/60 border border-cyan-500/30 font-bold">
+                  {surfaceData.images.length}
+                </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('telemetry')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
+                className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 sm:gap-2 flex-shrink-0 cursor-pointer ${
                   activeTab === 'telemetry'
                     ? 'bg-mars-950 text-mars-300 border border-mars-500/50 shadow-sm font-bold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Radio className="w-3.5 h-3.5 text-mars-400" />
-                <span>Sensor Telemetry & ECLSS Physics</span>
+                <Radio className="w-3.5 h-3.5 text-mars-400 flex-shrink-0" />
+                <span className="hidden sm:inline">Sensor Telemetry & ECLSS Physics</span>
+                <span className="sm:hidden">Telemetry & Physics</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('geology')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
+                className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 sm:gap-2 flex-shrink-0 cursor-pointer ${
                   activeTab === 'geology'
                     ? 'bg-bio-950 text-bio-300 border border-bio-500/50 shadow-sm font-bold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Mountain className="w-3.5 h-3.5 text-bio-400" />
-                <span>Geological & Agricultural Intel</span>
+                <Mountain className="w-3.5 h-3.5 text-bio-400 flex-shrink-0" />
+                <span className="hidden sm:inline">Geological & Agricultural Intel</span>
+                <span className="sm:hidden">Geology & Intel</span>
               </button>
             </div>
 
-            <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-400" />
-              <span>NASA Planetary Data System (PDS) Verified</span>
+            {/* NASA PDS Verified Status Pill */}
+            <div className="flex items-center justify-between sm:justify-start gap-2 text-[10px] sm:text-[11px] font-mono text-slate-400 bg-slate-900/50 md:bg-transparent px-2.5 py-1.5 sm:p-0 rounded-lg md:rounded-none border border-slate-800/60 md:border-0 w-full md:w-auto flex-shrink-0">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0 animate-pulse" />
+                <span className="truncate">NASA Planetary Data System (PDS) Verified</span>
+              </div>
+              <span className="text-[9px] text-green-400/80 font-bold uppercase md:hidden flex-shrink-0">PDS v4</span>
             </div>
           </div>
 
@@ -339,12 +350,12 @@ export const MarsSurfaceView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-4 sm:p-5 rounded-xl bg-space-950 border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono">
+              <div className="p-3.5 sm:p-5 rounded-xl bg-space-950 border border-slate-800 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs font-mono">
                   <span className="text-slate-300 font-bold uppercase">Closed-Loop Farm Harvest Multiplier</span>
                   <span className="text-bio-400 font-bold">+{Math.round((surfaceData.agriculturalAssessment.caloricHarvestMultiplier - 1) * 100)}% Environmental Bonus</span>
                 </div>
-                <p className="text-xs text-slate-400 font-light leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-slate-400 font-light leading-relaxed">
                   Based on local barometric pressure ({surfaceData.atmosphericPressureKpa} kPa) and natural thermal inertia, greenhouse heating penalties and hull stress are calculated deterministically by the MarsFarm simulation engine.
                 </p>
               </div>
@@ -395,53 +406,85 @@ export const MarsSurfaceView: React.FC = () => {
       {/* ── 5. High-Resolution NASA Image Lightbox Modal ────────────────────── */}
       {inspectingImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-8 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col justify-between p-3 sm:p-6 md:p-8 animate-in fade-in overflow-y-auto overscroll-contain select-none"
           onClick={() => setInspectingImage(null)}
         >
-          <div className="flex items-center justify-between text-xs font-mono text-slate-300 pb-3 border-b border-white/10" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-              <span className="text-cyan-300 font-bold uppercase">{inspectingImage.mission}</span>
-              <span className="text-slate-600">|</span>
-              <span>{inspectingImage.instrument}</span>
-              <span className="text-slate-600">|</span>
-              <span>{inspectingImage.solOrDate}</span>
+          {/* Modal Sticky Header */}
+          <div
+            className="sticky top-0 z-20 flex items-center justify-between gap-2 pb-2.5 sm:pb-3 border-b border-white/10 bg-black/85 backdrop-blur-md -mx-3 px-3 sm:mx-0 sm:px-0 flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0 pr-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping flex-shrink-0" />
+              <span className="text-[10px] sm:text-xs font-mono text-cyan-300 font-bold uppercase truncate max-w-[120px] sm:max-w-none">
+                {inspectingImage.mission}
+              </span>
+              <span className="text-slate-600 hidden xs:inline">·</span>
+              <span className="text-[10px] sm:text-xs font-mono text-slate-300 truncate max-w-[140px] sm:max-w-none">
+                {inspectingImage.instrument}
+              </span>
+              <span className="text-slate-600 hidden sm:inline">·</span>
+              <span className="text-[10px] sm:text-xs font-mono text-slate-400 hidden sm:inline">
+                {inspectingImage.solOrDate}
+              </span>
             </div>
 
             <button
               onClick={() => setInspectingImage(null)}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-all cursor-pointer flex-shrink-0 shadow-sm"
+              title="Close NASA Image Inspector"
+              aria-label="Close modal"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
 
-          <div className="flex-1 flex items-center justify-center p-2 sm:p-6 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={inspectingImage.imageUrl}
-              alt={inspectingImage.title}
-              className="max-h-[72vh] max-w-full object-contain rounded-xl shadow-2xl border border-white/15"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                if (inspectingImage.fallbackUrl && target.src !== inspectingImage.fallbackUrl) {
-                  target.src = inspectingImage.fallbackUrl;
-                } else {
-                  target.src = '/textures/mars_realistic.jpg';
-                }
-              }}
-            />
+          {/* Modal Central Image Display */}
+          <div
+            className="flex-1 flex items-center justify-center p-1 sm:p-4 md:p-6 my-auto min-h-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative max-w-full max-h-full flex items-center justify-center">
+              <img
+                src={inspectingImage.imageUrl}
+                alt={inspectingImage.title}
+                className="max-h-[50vh] sm:max-h-[64vh] md:max-h-[72vh] w-auto max-w-full object-contain rounded-xl shadow-2xl border border-white/15"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (inspectingImage.fallbackUrl && target.src !== inspectingImage.fallbackUrl) {
+                    target.src = inspectingImage.fallbackUrl;
+                  } else {
+                    target.src = '/textures/mars_realistic.jpg';
+                  }
+                }}
+              />
+              {inspectingImage.isPanorama && (
+                <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 backdrop-blur-sm border border-white/20 text-[9px] font-mono text-cyan-300 font-bold uppercase tracking-wider">
+                  360° Panorama
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="max-w-4xl mx-auto text-center space-y-1 pt-3 border-t border-white/10" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-base sm:text-lg font-bold font-display text-white">
+          {/* Modal Footer Dossier */}
+          <div
+            className="max-w-4xl mx-auto w-full text-center space-y-1 sm:space-y-1.5 pt-2.5 sm:pt-3 border-t border-white/10 flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xs sm:text-base md:text-lg font-bold font-display text-white px-2">
               {inspectingImage.title}
             </h2>
-            <p className="text-xs text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="text-[10px] sm:text-xs text-slate-300 max-w-2xl mx-auto font-light leading-relaxed px-2 line-clamp-3 sm:line-clamp-none">
               {inspectingImage.description}
             </p>
-            <p className="text-[10px] font-mono text-slate-500 pt-1">
-              Credit: {inspectingImage.credit} · NASA Planetary Data System
-            </p>
+            <div className="flex items-center justify-center gap-2 text-[9px] sm:text-[10px] font-mono text-slate-400 pt-0.5 flex-wrap">
+              <span>Credit: {inspectingImage.credit}</span>
+              <span className="text-slate-600">·</span>
+              <span className="text-green-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                NASA Planetary Data System (PDS)
+              </span>
+            </div>
           </div>
         </div>
       )}
