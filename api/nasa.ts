@@ -19,8 +19,9 @@ export default async function handler(req: any, res: any) {
 
   const apiKey = process.env.NASA_API_KEY || 'DEMO_KEY';
 
-  // Which NASA endpoint to proxy — passed as ?endpoint=insight_weather | apod | mars_photos
-  const endpoint = (req.query?.endpoint as string) || 'insight_weather';
+  // Which NASA endpoint to proxy — parsed using modern WHATWG URL API
+  const requestUrl = new URL(req.url || '', `http://${req.headers?.host || 'localhost'}`);
+  const endpoint = requestUrl.searchParams.get('endpoint') || req.query?.endpoint || 'insight_weather';
 
   try {
     let url = '';
