@@ -7,23 +7,30 @@ import { Sun, Moon, Wind, Eye, Video, Compass, Sparkles } from 'lucide-react';
 interface MarsSurfaceSceneProps {
   surfaceData: MarsSurfaceDetail;
   className?: string;
+  isDescending?: boolean;
   onSceneReady?: () => void;
+  onDescentComplete?: () => void;
 }
 
 export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   surfaceData,
   className = '',
+  isDescending = false,
   onSceneReady,
+  onDescentComplete,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [timeOfSol, setTimeOfSol] = useState<'day' | 'sunset' | 'night'>('day');
   const [isDustStormActive, setIsDustStormActive] = useState<boolean>(false);
   const [cameraMode, setCameraMode] = useState<'orbit' | 'firstPerson'>('orbit');
+  const [descentNotification, setDescentNotification] = useState<boolean>(isDescending);
 
   // References to keep Three.js animation cycle updated without recreating WebGL context
   const timeOfSolRef = useRef<'day' | 'sunset' | 'night'>('day');
   const isDustStormRef = useRef<boolean>(false);
   const cameraModeRef = useRef<'orbit' | 'firstPerson'>('orbit');
+  const isDescendingRef = useRef<boolean>(isDescending);
+  const descentStartTimeRef = useRef<number>(performance.now());
   const sceneElementsRef = useRef<{
     sunLight?: THREE.DirectionalLight;
     ambientLight?: THREE.AmbientLight;
@@ -34,6 +41,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     phobosMesh?: THREE.Mesh;
     camera?: THREE.PerspectiveCamera;
     controls?: OrbitControls;
+    shockwaveRing?: THREE.Mesh;
   }>({});
 
   useEffect(() => {
@@ -147,7 +155,11 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const height = container.clientHeight;
 
     const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 800);
-    camera.position.set(16, 12, 22);
+    if (isDescendingRef.current) {
+      camera.position.set(0, 32, 38);
+    } else {
+      camera.position.set(16, 12, 22);
+    }
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
@@ -457,6 +469,50 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
 
     scene.add(habitatGroup);
 
+    // ── 7B. Authentic Martian Rover Twin Tire Tracks ─────────────────────────
+    const trackGroup = new THREE.Group();
+    const trackMat = new THREE.MeshStandardMaterial({
+      color: 0x3d1711,
+      roughness: 0.95,
+      transparent: true,
+      opacity: 0.72,
+    });
+    [-0.9, 0.9].forEach((offsetZ) => {
+      const trackGeo = new THREE.PlaneGeometry(36, 0.35, 16);
+      trackGeo.rotateX(-Math.PI / 2);
+      const trackMesh = new THREE.Mesh(trackGeo, trackMat);
+      trackMesh.position.set(20, 0.04, offsetZ);
+      trackMesh.rotation.y = 0.08;
+      trackGroup.add(trackMesh);
+    });
+    scene.add(trackGroup);
+
+    // ── 7C. Horizon Atmospheric Dust Haze Ring (Mie Scattering) ───────────────
+    const hazeGeo = new THREE.CylinderGeometry(70, 70, 18, 36, 1, true);
+    const hazeMat = new THREE.MeshBasicMaterial({
+      color: surfaceData.terrain3DConfig.skyColorHex,
+      transparent: true,
+      opacity: 0.28,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+    });
+    const hazeMesh = new THREE.Mesh(hazeGeo, hazeMat);
+    hazeMesh.position.set(0, 8, 0);
+    scene.add(hazeMesh);
+
+    // ── 7D. Touchdown Shockwave Reticle Ring ──────────────────────────────────
+    const shockwaveGeo = new THREE.RingGeometry(0.8, 1.4, 32);
+    shockwaveGeo.rotateX(-Math.PI / 2);
+    const shockwaveMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: isDescendingRef.current ? 0.9 : 0.4,
+    });
+    const shockwaveRing = new THREE.Mesh(shockwaveGeo, shockwaveMat);
+    shockwaveRing.position.set(0, 0.08, 0);
+    scene.add(shockwaveRing);
+
     // ── 8. Dynamic Martian Dust Storm Particle System ─────────────────────────
     const dustCount = 1600;
     const dustGeo = new THREE.BufferGeometry();
@@ -497,6 +553,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       phobosMesh,
       camera,
       controls,
+      shockwaveRing,
     };
 
     onSceneReady?.();
@@ -537,6 +594,32 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         positions.needsUpdate = true;
       }
 
+      // Smooth descent camera transition when entering from orbit
+      if (isDescendingRef.current) {
+        const elapsedDescent = performance.now() - descentStartTimeRef.current;
+        const dur = 2400;
+        const rawT = Math.min(1, elapsedDescent / dur);
+        // Smooth cubic ease out
+        const easeOutT = 1 - Math.pow(1 - rawT, 3);
+
+        const startPos = new THREE.Vector3(0, 32, 38);
+        const endPos = new THREE.Vector3(16, 12, 22);
+        camera.position.lerpVectors(startPos, endPos, easeOutT);
+        controls.target.set(0, 2, 0);
+
+        if (shockwaveRing) {
+          const sScale = 1 + easeOutT * 10;
+          shockwaveRing.scale.set(sScale, sScale, sScale);
+          (shockwaveRing.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.9 * (1 - easeOutT));
+        }
+
+        if (rawT >= 1) {
+          isDescendingRef.current = false;
+          onDescentComplete?.();
+          setTimeout(() => setDescentNotification(false), 3500);
+        }
+      }
+
       controls.update();
       renderer.render(scene, camera);
     };
@@ -568,6 +651,23 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     <div className={`relative w-full h-full overflow-hidden select-none ${className}`}>
       {/* Three.js Canvas Container */}
       <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+
+      {/* Touchdown EDL Confirmed Banner */}
+      {descentNotification && (
+        <div className="absolute top-4 left-4 z-20 pointer-events-none animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="px-4 py-2.5 rounded-xl bg-black/90 backdrop-blur-md border border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+            <div>
+              <p className="text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-bold">
+                EDL SEQUENCE COMPLETE // TOUCHDOWN CONFIRMED
+              </p>
+              <p className="text-xs font-bold font-display text-white">
+                {surfaceData.name.toUpperCase()} · SOL 1 EXPLORATION ACTIVE
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Surface Controls Floating Toolbar */}
       <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto">

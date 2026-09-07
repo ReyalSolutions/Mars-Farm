@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { MARS_SURFACE_DATA, MarsSurfaceDetail, NasaSurfaceImage } from '../data/marsSurfaceData';
 import { MARS_LOCATIONS } from '../data/marsLocations';
 import { MarsSurfaceScene } from '../components/visualization/MarsSurfaceScene';
@@ -13,8 +13,11 @@ import {
 
 export const MarsSurfaceView: React.FC = () => {
   const { locationId } = useParams<{ locationId?: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setLocation } = useMission();
+
+  const isDescending = searchParams.get('descent') === '1';
 
   // Active location selection (default to jezero-crater if not specified)
   const activeId = locationId && MARS_SURFACE_DATA[locationId] ? locationId : 'jezero-crater';
@@ -107,7 +110,7 @@ export const MarsSurfaceView: React.FC = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
         {/* 3D Surface Viewport Canvas Container */}
         <div className="w-full h-[380px] sm:h-[480px] lg:h-[540px] rounded-2xl sm:rounded-3xl hud-panel border-cyan-500/30 relative overflow-hidden shadow-2xl">
-          <MarsSurfaceScene surfaceData={surfaceData} />
+          <MarsSurfaceScene surfaceData={surfaceData} isDescending={isDescending} />
         </div>
 
         {/* ── 4. Surface Dossier Tabs & Intel Panel ──────────────────────────── */}
@@ -175,8 +178,12 @@ export const MarsSurfaceView: React.FC = () => {
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
-                          // Fallback in case of external NASA asset block
-                          (e.target as HTMLImageElement).src = '/textures/mars_realistic.jpg';
+                          const target = e.target as HTMLImageElement;
+                          if (img.fallbackUrl && target.src !== img.fallbackUrl) {
+                            target.src = img.fallbackUrl;
+                          } else {
+                            target.src = '/textures/mars_realistic.jpg';
+                          }
                         }}
                       />
                       {img.isPanorama && (
@@ -351,6 +358,14 @@ export const MarsSurfaceView: React.FC = () => {
               src={inspectingImage.imageUrl}
               alt={inspectingImage.title}
               className="max-h-[72vh] max-w-full object-contain rounded-xl shadow-2xl border border-white/15"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (inspectingImage.fallbackUrl && target.src !== inspectingImage.fallbackUrl) {
+                  target.src = inspectingImage.fallbackUrl;
+                } else {
+                  target.src = '/textures/mars_realistic.jpg';
+                }
+              }}
             />
           </div>
 

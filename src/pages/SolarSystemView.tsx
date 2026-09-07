@@ -765,6 +765,27 @@ export const SolarSystemView: React.FC = () => {
   const flightTargetPosRef = useRef<THREE.Vector3 | null>(null);
   const flightTargetDistRef = useRef<number | null>(null);
 
+  // Atmospheric Entry, Descent & Landing (EDL) Sequence State
+  const [edlSequence, setEdlSequence] = useState<{
+    active: boolean;
+    location: MarsLocation;
+    startTime: number;
+    durationMs: number;
+    altitudeKm: number;
+    velocityKmh: number;
+    stageName: string;
+    heatTempC: number;
+  } | null>(null);
+
+  const edlSequenceRef = useRef<{
+    active: boolean;
+    location: MarsLocation;
+    startTime: number;
+    durationMs: number;
+    cameraStartPos: THREE.Vector3;
+    cameraStartTarget: THREE.Vector3;
+  } | null>(null);
+
   // Layer groups for toggles
   const asteroidGroupRef = useRef<THREE.Group | null>(null);
   const cometGroupRef = useRef<THREE.Group | null>(null);
@@ -884,6 +905,51 @@ export const SolarSystemView: React.FC = () => {
       }
     }
   }, [planets]);
+
+  // ── Cinematic Mars Atmospheric Entry, Descent & Landing (EDL) Trigger ────────
+  const handleInitiateDescent = useCallback((loc: MarsLocation) => {
+    // 1. Clear any open inspection panels
+    setSelectedMarsLocation(null);
+    setSelectedPlanet(null);
+    setSelectedMinorBody(null);
+    setSelectedComet(null);
+    setSelectedMoon(null);
+    setSelectedSpacecraft(null);
+    setIsSunSelected(false);
+
+    // 2. Lock camera tracking target to Mars
+    focusedBodyIdRef.current = 'mars';
+    setFocusedBodyId('mars');
+
+    if (!controlsRef.current) {
+      navigate(`/surface/${loc.id}?descent=1`);
+      return;
+    }
+
+    const camera = controlsRef.current.object as THREE.PerspectiveCamera;
+    const durationMs = 2800; // 2.8 seconds cinematic entry
+    const startTime = performance.now();
+
+    edlSequenceRef.current = {
+      active: true,
+      location: loc,
+      startTime,
+      durationMs,
+      cameraStartPos: camera.position.clone(),
+      cameraStartTarget: controlsRef.current.target.clone(),
+    };
+
+    setEdlSequence({
+      active: true,
+      location: loc,
+      startTime,
+      durationMs,
+      altitudeKm: 125,
+      velocityKmh: 21200,
+      stageName: 'ATMOSPHERIC ENTRY INTERFACE (ALT: 125 KM)',
+      heatTempC: 1850,
+    });
+  }, [navigate]);
 
   // ── Sync Layer Visibility ───────────────────────────────────────────────────
   useEffect(() => {
@@ -2170,7 +2236,69 @@ export const SolarSystemView: React.FC = () => {
       }
 
       // 2. Camera Flight Transition Interpolation
-      if (flightTargetPosRef.current && flightTargetDistRef.current !== null) {
+      if (edlSequenceRef.current?.active) {
+        const edl = edlSequenceRef.current;
+        const now = performance.now();
+        const elapsed = now - edl.startTime;
+        const rawT = Math.min(1, elapsed / edl.durationMs);
+        // Smooth cubic ease in-out
+        const t = rawT < 0.5 ? 4 * rawT * rawT * rawT : 1 - Math.pow(-2 * rawT + 2, 3) / 2;
+
+        // Locate current world position of Mars and the landing site pin
+        const marsEntry = planetMeshesRef.current.find(p => p.data.id === 'mars');
+        const marsWorldPos = new THREE.Vector3();
+        if (marsEntry) {
+          marsWorldPos.copy(marsEntry.mesh.position);
+        }
+
+        const targetPin = marsLocationHitTargetsRef.current.find(h => h.location.id === edl.location.id);
+        const pinWorldPos = new THREE.Vector3();
+        if (targetPin) {
+          targetPin.mesh.getWorldPosition(pinWorldPos);
+        } else {
+          pinWorldPos.copy(marsWorldPos);
+        }
+
+        const normalDir = pinWorldPos.clone().sub(marsWorldPos).normalize();
+        if (normalDir.lengthSq() < 0.001) normalDir.set(0, 1, 0);
+
+        // Terminal descent camera position: 0.045 Three.js units right above the pin!
+        const terminalCamPos = pinWorldPos.clone().add(normalDir.multiplyScalar(0.045));
+
+        controls.target.lerpVectors(edl.cameraStartTarget, pinWorldPos, t);
+        camera.position.lerpVectors(edl.cameraStartPos, terminalCamPos, t);
+
+        // Calculate real-time EDL telemetry metrics
+        const altKm = Math.max(0, 125 * Math.pow(1 - rawT, 2.4));
+        const velKmh = Math.max(0, Math.round(21200 * Math.pow(1 - rawT, 2.0)));
+        const heatC = Math.max(80, Math.round(2100 * Math.sin(rawT * Math.PI)));
+        let stage = 'ATMOSPHERIC ENTRY INTERFACE (ALT: 125 KM)';
+        if (rawT >= 0.20 && rawT < 0.45) stage = 'HYPERSONIC BRAKING & PEAK PLASMA HEATING';
+        else if (rawT >= 0.45 && rawT < 0.70) stage = 'SUPERSONIC PARACHUTE DEPLOYMENT';
+        else if (rawT >= 0.70 && rawT < 0.88) stage = 'RADAR TERRAIN-RELATIVE NAVIGATION';
+        else if (rawT >= 0.88 && rawT < 0.98) stage = 'TERMINAL RETROROCKET BRAKING';
+        else if (rawT >= 0.98) stage = 'TOUCHDOWN CONFIRMED';
+
+        if (frameCountRef.current % 2 === 0 || rawT >= 1) {
+          setEdlSequence({
+            active: true,
+            location: edl.location,
+            startTime: edl.startTime,
+            durationMs: edl.durationMs,
+            altitudeKm: altKm,
+            velocityKmh: velKmh,
+            stageName: stage,
+            heatTempC: heatC,
+          });
+        }
+
+        if (rawT >= 1) {
+          edlSequenceRef.current = null;
+          setEdlSequence(null);
+          navigate(`/surface/${edl.location.id}?descent=1`);
+          return;
+        }
+      } else if (flightTargetPosRef.current && flightTargetDistRef.current !== null) {
         controls.target.lerp(flightTargetPosRef.current, 0.08);
 
         const camToTarget = camera.position.clone().sub(controls.target);
@@ -2393,7 +2521,7 @@ export const SolarSystemView: React.FC = () => {
               {MARS_LOCATIONS.map(loc => (
                 <button
                   key={loc.id}
-                  onClick={() => navigate(`/surface/${loc.id}`)}
+                  onClick={() => handleInitiateDescent(loc)}
                   className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-mars-950/40 border border-white/10 hover:border-mars-500/50 text-[11px] font-mono text-slate-300 hover:text-white transition-all text-left group cursor-pointer"
                 >
                   <span className="truncate">{loc.name.replace(' Crater', '')}</span>
@@ -2403,7 +2531,10 @@ export const SolarSystemView: React.FC = () => {
             </div>
 
             <button
-              onClick={() => navigate('/surface/jezero-crater')}
+              onClick={() => {
+                const jezero = MARS_LOCATIONS.find(l => l.id === 'jezero-crater') || MARS_LOCATIONS[0];
+                handleInitiateDescent(jezero);
+              }}
               className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-mars-600 hover:from-amber-400 hover:to-mars-500 text-white text-xs font-mono transition-all font-bold group cursor-pointer shadow-[0_0_20px_rgba(249,115,22,0.35)] border border-amber-400/40"
             >
               <div className="flex items-center gap-2">
@@ -2756,7 +2887,7 @@ export const SolarSystemView: React.FC = () => {
 
         <div className="pt-1 flex flex-col gap-2">
           <button
-            onClick={() => navigate(`/surface/${loc.id}`)}
+            onClick={() => handleInitiateDescent(loc)}
             className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-mars-600 hover:from-amber-400 hover:to-mars-500 text-white text-xs font-mono font-bold transition-all shadow-[0_0_24px_rgba(249,115,22,0.45)] group cursor-pointer border border-amber-400/40"
           >
             <div className="flex items-center gap-2">
@@ -3411,6 +3542,83 @@ export const SolarSystemView: React.FC = () => {
         {selectedMarsLocation && <MarsLocationCard loc={selectedMarsLocation} />}
         {isSunSelected && <SunPanel />}
       </div>
+
+      {/* ── Entry, Descent & Landing (EDL) Atmospheric Re-entry Cinematic HUD Overlay ── */}
+      {edlSequence && edlSequence.active && (
+        <div className="fixed inset-0 z-50 pointer-events-auto flex flex-col justify-between p-4 sm:p-8 select-none overflow-hidden animate-in fade-in duration-300">
+          {/* Pulsing atmospheric re-entry plasma aura vignette */}
+          <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_120px_rgba(249,115,22,0.75)] animate-pulse" />
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-orange-950/40 via-transparent to-red-950/30" />
+
+          {/* Top Bar: Mission & Skip */}
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-black/85 backdrop-blur-md border border-orange-500/50 shadow-lg">
+              <span className="w-2.5 h-2.5 rounded-full bg-orange-400 animate-ping" />
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-orange-400 font-bold">
+                  NASA EDL TRAJECTORY // ATMOSPHERIC ENTRY
+                </p>
+                <p className="text-xs font-bold font-display text-white">
+                  TARGET: {edlSequence.location.name.toUpperCase()}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                edlSequenceRef.current = null;
+                setEdlSequence(null);
+                navigate(`/surface/${edlSequence.location.id}?descent=1`);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-black/80 hover:bg-black text-slate-300 hover:text-white border border-white/20 text-xs font-mono transition-all backdrop-blur-md cursor-pointer flex items-center gap-1.5 shadow-lg"
+            >
+              <span>SKIP ENTRY</span>
+              <FastForward className="w-3.5 h-3.5 text-orange-400" />
+            </button>
+          </div>
+
+          {/* Center: Targeting Reticle & Radar Lock */}
+          <div className="relative z-10 flex flex-col items-center justify-center my-auto pointer-events-none">
+            <div className="relative w-40 sm:w-52 h-40 sm:h-52 rounded-full border border-orange-400/50 flex items-center justify-center animate-spin" style={{ animationDuration: '12s' }}>
+              <div className="w-32 sm:w-40 h-32 sm:h-40 rounded-full border border-dashed border-orange-300/40" />
+            </div>
+            <div className="absolute w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+            <p className="text-[10px] font-mono text-cyan-300 mt-4 uppercase tracking-widest bg-black/80 px-3 py-1 rounded-full border border-cyan-500/40 shadow-lg">
+              TRN LOCK: {edlSequence.location.latitude}°N · {edlSequence.location.longitude}°E
+            </p>
+          </div>
+
+          {/* Bottom Telemetry HUD */}
+          <div className="relative z-10 max-w-2xl mx-auto w-full space-y-3">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="px-3 py-2 rounded-xl bg-black/85 backdrop-blur-md border border-orange-500/40">
+                <span className="text-[9px] font-mono text-slate-400 uppercase block">Altitude</span>
+                <span className="text-sm sm:text-lg font-bold font-display text-white">
+                  {edlSequence.altitudeKm.toFixed(1)} km
+                </span>
+              </div>
+              <div className="px-3 py-2 rounded-xl bg-black/85 backdrop-blur-md border border-orange-500/40">
+                <span className="text-[9px] font-mono text-slate-400 uppercase block">Velocity</span>
+                <span className="text-sm sm:text-lg font-bold font-display text-orange-300">
+                  {edlSequence.velocityKmh.toLocaleString()} km/h
+                </span>
+              </div>
+              <div className="px-3 py-2 rounded-xl bg-black/85 backdrop-blur-md border border-orange-500/40">
+                <span className="text-[9px] font-mono text-slate-400 uppercase block">Heat Shield</span>
+                <span className="text-sm sm:text-lg font-bold font-display text-red-400">
+                  {edlSequence.heatTempC}°C
+                </span>
+              </div>
+            </div>
+
+            <div className="px-4 py-2.5 rounded-xl bg-black/90 backdrop-blur-md border border-orange-500/60 shadow-[0_0_25px_rgba(249,115,22,0.35)] text-center">
+              <p className="text-xs sm:text-sm font-mono font-bold text-orange-300 tracking-wider">
+                {edlSequence.stageName}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Loading Screen */}
       {dataStatus === 'loading' && (
