@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MarsSurfaceDetail } from '../../data/marsSurfaceData';
-import { Sun, Moon, Wind, Eye, Video, Compass, Sparkles } from 'lucide-react';
+import { Sun, Moon, Wind, Eye, Compass, Sparkles } from 'lucide-react';
 
 interface MarsSurfaceSceneProps {
   surfaceData: MarsSurfaceDetail;
@@ -11,6 +11,55 @@ interface MarsSurfaceSceneProps {
   onSceneReady?: () => void;
   onDescentComplete?: () => void;
 }
+
+// ── Soft Organic Dust & Smoke Puff Canvas Textures (Eliminates Box Pixels) ─────
+
+const createSoftDustTexture = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.Texture();
+
+  const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(255, 230, 195, 0.95)');
+  grad.addColorStop(0.2, 'rgba(235, 140, 85, 0.75)');
+  grad.addColorStop(0.45, 'rgba(195, 95, 50, 0.38)');
+  grad.addColorStop(0.75, 'rgba(145, 55, 28, 0.10)');
+  grad.addColorStop(1, 'rgba(95, 30, 15, 0.0)');
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 128, 128);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.ClampToEdgeWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.needsUpdate = true;
+  return tex;
+};
+
+const createSandGrainTexture = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.Texture();
+
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255, 245, 220, 1.0)');
+  grad.addColorStop(0.35, 'rgba(225, 140, 90, 0.8)');
+  grad.addColorStop(0.75, 'rgba(175, 75, 40, 0.25)');
+  grad.addColorStop(1, 'rgba(120, 45, 20, 0.0)');
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.ClampToEdgeWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.needsUpdate = true;
+  return tex;
+};
 
 export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   surfaceData,
@@ -31,6 +80,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   const cameraModeRef = useRef<'orbit' | 'firstPerson'>('orbit');
   const isDescendingRef = useRef<boolean>(isDescending);
   const descentStartTimeRef = useRef<number>(performance.now());
+
   const sceneElementsRef = useRef<{
     sunLight?: THREE.DirectionalLight;
     ambientLight?: THREE.AmbientLight;
@@ -38,6 +88,12 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     fog?: THREE.FogExp2;
     domeLights?: THREE.PointLight[];
     dustParticles?: THREE.Points;
+    saltationParticles?: THREE.Points;
+    dustDevilGroup?: THREE.Group;
+    dustDevilParticles?: THREE.Points;
+    dustSheets?: THREE.Mesh[];
+    strobeLights?: THREE.PointLight[];
+    commsGroup?: THREE.Group;
     phobosMesh?: THREE.Mesh;
     camera?: THREE.PerspectiveCamera;
     controls?: OrbitControls;
@@ -69,57 +125,62 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     if (currentSolTime === 'day') {
       // Midday: High Sun, warm salmon-tan Martian sky
       sunLight.position.set(40, 60, 30);
-      sunLight.color.setHex(0xffecd0);
-      sunLight.intensity = isStorm ? 0.7 : 2.2;
-      ambientLight.color.setHex(0xab5838);
-      ambientLight.intensity = isStorm ? 0.4 : 0.85;
+      sunLight.color.setHex(isStorm ? 0xdf7840 : 0xffecd0);
+      sunLight.intensity = isStorm ? 0.35 : 2.2;
+      ambientLight.color.setHex(isStorm ? 0x6e2c18 : 0xab5838);
+      ambientLight.intensity = isStorm ? 0.65 : 0.85;
 
-      fog.color.setHex(isStorm ? 0x994426 : surfaceData.terrain3DConfig.skyColorHex);
-      fog.density = isStorm ? 0.038 : (surfaceData.terrain3DConfig.fogDensity || 0.012);
+      fog.color.setHex(isStorm ? 0x7a2c16 : surfaceData.terrain3DConfig.skyColorHex);
+      fog.density = isStorm ? 0.046 : (surfaceData.terrain3DConfig.fogDensity || 0.012);
 
       (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(
-        isStorm ? 0x8a381e : surfaceData.terrain3DConfig.skyColorHex
+        isStorm ? 0x6e2412 : surfaceData.terrain3DConfig.skyColorHex
       );
 
-      if (domeLights) domeLights.forEach(l => (l.intensity = 0.8));
+      if (domeLights) domeLights.forEach(l => (l.intensity = isStorm ? 2.2 : 0.8));
       if (phobosMesh) phobosMesh.visible = false;
     } else if (currentSolTime === 'sunset') {
-      // Martian Blue Sunset: Low sun with iconic blue glow around disk
+      // Martian Blue Sunset: Low sun with iconic blue halo around disk
       sunLight.position.set(80, 5, -20);
-      sunLight.color.setHex(0x70b8ff); // Cool blue solar halo
-      sunLight.intensity = isStorm ? 0.4 : 1.6;
-      ambientLight.color.setHex(0x5c2b22);
-      ambientLight.intensity = 0.5;
+      sunLight.color.setHex(isStorm ? 0x5a88c0 : 0x70b8ff);
+      sunLight.intensity = isStorm ? 0.20 : 1.6;
+      ambientLight.color.setHex(isStorm ? 0x4a1e16 : 0x5c2b22);
+      ambientLight.intensity = 0.55;
 
-      fog.color.setHex(0x6b3026);
-      fog.density = isStorm ? 0.045 : 0.016;
+      fog.color.setHex(isStorm ? 0x542016 : 0x6b3026);
+      fog.density = isStorm ? 0.052 : 0.016;
 
-      (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(0x4a221d);
+      (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(isStorm ? 0x3d1410 : 0x4a221d);
 
-      if (domeLights) domeLights.forEach(l => (l.intensity = 2.0));
-      if (phobosMesh) phobosMesh.visible = true;
+      if (domeLights) domeLights.forEach(l => (l.intensity = 2.8));
+      if (phobosMesh) phobosMesh.visible = !isStorm;
     } else {
       // Frigid Martian Night: Deep cosmos, Phobos & stars, warm habitat interior
       sunLight.position.set(-30, -20, 20);
-      sunLight.intensity = 0.05;
-      ambientLight.color.setHex(0x1a1224);
+      sunLight.intensity = 0.02;
+      ambientLight.color.setHex(isStorm ? 0x220c06 : 0x1a1224);
       ambientLight.intensity = 0.35;
 
-      fog.color.setHex(0x060814);
-      fog.density = isStorm ? 0.032 : 0.008;
+      fog.color.setHex(isStorm ? 0x180806 : 0x060814);
+      fog.density = isStorm ? 0.040 : 0.008;
 
       (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(0x02040c);
 
       if (domeLights) domeLights.forEach(l => (l.intensity = 4.5));
-      if (phobosMesh) phobosMesh.visible = true;
+      if (phobosMesh) phobosMesh.visible = !isStorm;
     }
   };
 
   const updateDustStormState = () => {
-    const { dustParticles } = sceneElementsRef.current;
-    if (dustParticles) {
-      dustParticles.visible = isDustStormRef.current;
-    }
+    const { dustParticles, saltationParticles, dustDevilGroup, dustSheets, strobeLights } = sceneElementsRef.current;
+    const isStorm = isDustStormRef.current;
+
+    if (dustParticles) dustParticles.visible = isStorm;
+    if (saltationParticles) saltationParticles.visible = isStorm;
+    if (dustDevilGroup) dustDevilGroup.visible = isStorm;
+    if (dustSheets) dustSheets.forEach(s => (s.visible = isStorm));
+    if (strobeLights) strobeLights.forEach(l => (l.visible = isStorm));
+
     updateLightingAndAtmosphere();
   };
 
@@ -154,7 +215,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 800);
+    const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 900);
     if (isDescendingRef.current) {
       camera.position.set(0, 32, 38);
     } else {
@@ -176,10 +237,10 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     controls.target.set(0, 2, 0);
     controls.maxPolarAngle = Math.PI / 2 - 0.04;
     controls.minDistance = 5;
-    controls.maxDistance = 70;
+    controls.maxDistance = 75;
 
     // ── 2. Atmosphere & Sky Dome ───────────────────────────────────────────────
-    const skyGeo = new THREE.SphereGeometry(350, 32, 16);
+    const skyGeo = new THREE.SphereGeometry(400, 32, 16);
     const skyMat = new THREE.MeshBasicMaterial({
       color: surfaceData.terrain3DConfig.skyColorHex,
       side: THREE.BackSide,
@@ -198,27 +259,25 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 5;
-    sunLight.shadow.camera.far = 140;
+    sunLight.shadow.camera.far = 160;
     sunLight.shadow.camera.left = -35;
     sunLight.shadow.camera.right = 35;
     sunLight.shadow.camera.top = 35;
     sunLight.shadow.camera.bottom = -35;
-    sunLight.shadow.bias = -0.0004;
     scene.add(sunLight);
 
     const ambientLight = new THREE.AmbientLight(0xab5838, 0.85);
     scene.add(ambientLight);
 
-    // ── 4. Celestial Objects in Sky: Sun Disk & Phobos Moon ───────────────────
+    // ── 4. Celestial Objects: Sun Disk & Phobos Moon ───────────────────────────
     const sunDiskMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const sunDisk = new THREE.Mesh(new THREE.SphereGeometry(4, 16, 16), sunDiskMat);
+    const sunDisk = new THREE.Mesh(new THREE.SphereGeometry(4.5, 16, 16), sunDiskMat);
     sunDisk.position.set(120, 180, 90);
     scene.add(sunDisk);
 
     // Martian moon Phobos (irregular cratered potato)
     const phobosMat = new THREE.MeshStandardMaterial({ color: 0x888280, roughness: 0.95 });
-    const phobosGeo = new THREE.SphereGeometry(2.5, 16, 12);
-    // Deform into elongated Phobos shape
+    const phobosGeo = new THREE.SphereGeometry(2.8, 16, 12);
     const pPos = phobosGeo.attributes.position;
     for (let i = 0; i < pPos.count; i++) {
       const vx = pPos.getX(i);
@@ -237,11 +296,11 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const starGeo = new THREE.BufferGeometry();
     const starPositions = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
-      const radius = 320;
+      const radius = 350;
       const theta = 2 * Math.PI * Math.random();
       const phi = Math.acos(2 * Math.random() - 1);
       starPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      starPositions[i * 3 + 1] = Math.abs(radius * Math.cos(phi)) + 10; // Upper hemisphere
+      starPositions[i * 3 + 1] = Math.abs(radius * Math.cos(phi)) + 10;
       starPositions[i * 3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
@@ -249,9 +308,9 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 
-    // ── 5. Photorealistic Procedural Martian Terrain ────────────────────────────
-    const terrainSize = 140;
-    const terrainSegments = 128;
+    // ── 5. Photorealistic Procedural Martian Terrain with Sand Ripples ─────────
+    const terrainSize = 150;
+    const terrainSegments = 140;
     const terrainGeo = new THREE.PlaneGeometry(terrainSize, terrainSize, terrainSegments, terrainSegments);
     terrainGeo.rotateX(-Math.PI / 2);
 
@@ -267,27 +326,27 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
 
       // Multi-octave natural Martian elevation displacement
       let elevation =
-        Math.sin(x * 0.08) * Math.cos(z * 0.08) * 1.2 +
+        Math.sin(x * 0.08) * Math.cos(z * 0.08) * 1.3 +
         Math.sin(x * 0.18 + 1.2) * Math.cos(z * 0.14) * 0.6 +
         Math.sin(x * 0.35) * Math.sin(z * 0.35) * 0.25;
+
+      // Eolian sand ripple waves across the terrain (wavelength ~1.4m)
+      const ripples = Math.sin(x * 1.6 + z * 0.8) * 0.08 + Math.cos(x * 0.8 - z * 1.4) * 0.05;
+      elevation += ripples * (distFromCenter > 9 ? 1 : distFromCenter / 9);
 
       // Flatten the central clearing for the colony bio-dome (r < 14 meters)
       if (distFromCenter < 14) {
         const flatFactor = Math.max(0, (distFromCenter - 4) / 10);
         elevation *= flatFactor * 0.15;
       } else {
-        // Site-specific topography
         if (isCanyon) {
-          // Towering canyon walls along Z axis
           const wallDist = Math.abs(x);
           if (wallDist > 20) {
             elevation += Math.pow((wallDist - 20) * 0.45, 1.7) * 0.6;
           }
         } else if (isLavaTubes) {
-          // Basaltic lava ridges
           elevation += Math.sin(x * 0.12) * 2.8 * (distFromCenter / 40);
         } else {
-          // Crater rim slope in the distance
           if (distFromCenter > 25) {
             elevation += Math.pow((distFromCenter - 25) * 0.12, 1.5) * rimScale;
           }
@@ -298,10 +357,9 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     }
     terrainGeo.computeVertexNormals();
 
-    // Authentic regolith surface material
     const terrainMat = new THREE.MeshStandardMaterial({
       color: surfaceData.terrain3DConfig.groundColorHex,
-      roughness: surfaceData.terrain3DConfig.roughness || 0.9,
+      roughness: surfaceData.terrain3DConfig.roughness || 0.92,
       metalness: 0.04,
       flatShading: false,
     });
@@ -309,19 +367,45 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     terrainMesh.receiveShadow = true;
     scene.add(terrainMesh);
 
+    // ── 5B. Distant Perimeter Mountain Ridge & Crater Rim ─────────────────────
+    const mountainRingGeo = new THREE.CylinderGeometry(155, 170, 52, 64, 4, true);
+    const mPos = mountainRingGeo.attributes.position;
+    for (let i = 0; i < mPos.count; i++) {
+      const my = mPos.getY(i);
+      const mx = mPos.getX(i);
+      const mz = mPos.getZ(i);
+      const angle = Math.atan2(mz, mx);
+      const peakDeform =
+        Math.sin(angle * 6) * 9 +
+        Math.cos(angle * 13 + 1.2) * 6 +
+        Math.sin(angle * 26) * 2.5;
+      if (my > 0) {
+        mPos.setY(i, my + peakDeform);
+      }
+    }
+    mountainRingGeo.computeVertexNormals();
+    const mountainMat = new THREE.MeshStandardMaterial({
+      color: surfaceData.terrain3DConfig.groundColorHex,
+      roughness: 0.95,
+      metalness: 0.05,
+      side: THREE.BackSide,
+    });
+    const mountainMesh = new THREE.Mesh(mountainRingGeo, mountainMat);
+    mountainMesh.position.set(0, 14, 0);
+    scene.add(mountainMesh);
+
     // ── 6. Natural Basalt Boulders Scattered on Terrain ───────────────────────
     const boulderCount =
-      surfaceData.terrain3DConfig.boulderDensity === 'heavy' ? 70 : surfaceData.terrain3DConfig.boulderDensity === 'sparse' ? 20 : 40;
+      surfaceData.terrain3DConfig.boulderDensity === 'heavy' ? 75 : surfaceData.terrain3DConfig.boulderDensity === 'sparse' ? 24 : 45;
     const boulderGroup = new THREE.Group();
 
     for (let b = 0; b < boulderCount; b++) {
-      const bRad = 0.35 + Math.random() * 0.9;
+      const bRad = 0.35 + Math.random() * 0.95;
       const bGeo = new THREE.DodecahedronGeometry(bRad, 1);
 
-      // Irregular rock deformation
       const bPos = bGeo.attributes.position;
       for (let j = 0; j < bPos.count; j++) {
-        const noise = 1 + (Math.random() - 0.5) * 0.35;
+        const noise = 1 + (Math.random() - 0.5) * 0.4;
         bPos.setXYZ(j, bPos.getX(j) * noise, bPos.getY(j) * noise * 0.8, bPos.getZ(j) * noise);
       }
       bGeo.computeVertexNormals();
@@ -332,9 +416,8 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       });
 
       const boulder = new THREE.Mesh(bGeo, bMat);
-      // Scatter outside the colony clearing
       const angle = Math.random() * Math.PI * 2;
-      const radius = 10 + Math.random() * 45;
+      const radius = 10 + Math.random() * 50;
       const bx = radius * Math.cos(angle);
       const bz = radius * Math.sin(angle);
       boulder.position.set(bx, 0.4, bz);
@@ -348,7 +431,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     // ── 7. Mars Farm Colony Bio-Dome Habitat Model ────────────────────────────
     const habitatGroup = new THREE.Group();
 
-    // Main Geodesic Bio-Dome (Transparent Polycarbonate & Structural Struts)
+    // Main Geodesic Bio-Dome
     const domeRadius = 4.8;
     const domeGeo = new THREE.SphereGeometry(domeRadius, 24, 18, 0, Math.PI * 2, 0, Math.PI / 2);
     const domeMat = new THREE.MeshPhysicalMaterial({
@@ -365,21 +448,21 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     domeMesh.castShadow = true;
     habitatGroup.add(domeMesh);
 
-    // Dome Structural Support Ring / Base Foundation
+    // Base Foundation Ring
     const ringGeo = new THREE.CylinderGeometry(domeRadius * 1.02, domeRadius * 1.05, 0.6, 24);
     const ringMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3 });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
     ringMesh.position.set(0, 0.3, 0);
     habitatGroup.add(ringMesh);
 
-    // Glowing Bio-Regenerative Hydroponic Crop Beds Inside Dome
+    // Glowing Hydroponic Crop Beds Inside Dome
     const cropBedGeo = new THREE.CylinderGeometry(3.6, 3.6, 0.3, 16);
     const cropBedMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
     const cropBed = new THREE.Mesh(cropBedGeo, cropBedMat);
     cropBed.position.set(0, 0.25, 0);
     habitatGroup.add(cropBed);
 
-    // Glowing Crop Plants (Vibrant photosynthetic greens)
+    // Glowing Crop Plants
     const plantCount = 28;
     const plantMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
     for (let p = 0; p < plantCount; p++) {
@@ -391,7 +474,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       habitatGroup.add(plant);
     }
 
-    // Interior Warm Lighting radiating out of Bio-Dome
+    // Interior Lighting
     const interiorDomeLight = new THREE.PointLight(0x00ff9d, 1.8, 25);
     interiorDomeLight.position.set(0, 2.8, 0);
     habitatGroup.add(interiorDomeLight);
@@ -409,7 +492,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     airlock.castShadow = true;
     habitatGroup.add(airlock);
 
-    // Outer Airlock Hatch Door with Martian Colony Decal
+    // Outer Airlock Hatch Door
     const hatchGeo = new THREE.CylinderGeometry(0.9, 0.9, 0.2, 16);
     hatchGeo.rotateZ(Math.PI / 2);
     const hatchMat = new THREE.MeshStandardMaterial({ color: 0xff4d2e, roughness: 0.4 });
@@ -417,10 +500,9 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     hatch.position.set(domeRadius + 2.4, 1.1, 0);
     habitatGroup.add(hatch);
 
-    // Dual Photovoltaic Solar Tracking Arrays
+    // Dual Solar Arrays
     const createSolarArray = (x: number, z: number, angle: number) => {
       const arrayGroup = new THREE.Group();
-      // Mast pole
       const poleGeo = new THREE.CylinderGeometry(0.12, 0.15, 2.8, 12);
       const poleMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
       const pole = new THREE.Mesh(poleGeo, poleMat);
@@ -428,7 +510,6 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       pole.castShadow = true;
       arrayGroup.add(pole);
 
-      // Solar Panel Face (Deep blue photovoltaic cells)
       const panelGeo = new THREE.BoxGeometry(4.2, 0.08, 2.2);
       const panelMat = new THREE.MeshStandardMaterial({
         color: 0x0f172a,
@@ -445,11 +526,10 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       arrayGroup.position.set(x, 0, z);
       return arrayGroup;
     };
-
     habitatGroup.add(createSolarArray(-9, 4, 0.2));
     habitatGroup.add(createSolarArray(-8, -6, -0.3));
 
-    // Closed-Loop ECLSS Atmospheric Moisture Condenser Tower
+    // Moisture Condenser Tower
     const towerGeo = new THREE.CylinderGeometry(0.6, 0.7, 4.5, 16);
     const towerMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
     const tower = new THREE.Mesh(towerGeo, towerMat);
@@ -457,7 +537,6 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     tower.castShadow = true;
     habitatGroup.add(tower);
 
-    // Condenser Radiator Coils (Cyan indicator glow)
     const coilGeo = new THREE.TorusGeometry(0.75, 0.08, 8, 24);
     coilGeo.rotateX(Math.PI / 2);
     const coilMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
@@ -469,7 +548,99 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
 
     scene.add(habitatGroup);
 
-    // ── 7B. Authentic Martian Rover Twin Tire Tracks ─────────────────────────
+    // ── 7B. High-Gain Communications Satellite Dish ───────────────────────────
+    const commsGroup = new THREE.Group();
+    const mastGeo = new THREE.CylinderGeometry(0.12, 0.22, 5.2, 8);
+    const mastMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
+    const mast = new THREE.Mesh(mastGeo, mastMat);
+    mast.position.set(0, 2.6, 0);
+    commsGroup.add(mast);
+
+    const dishGeo = new THREE.SphereGeometry(1.6, 24, 16, 0, Math.PI * 2, 0, Math.PI / 3);
+    const dishMat = new THREE.MeshStandardMaterial({
+      color: 0xf8fafc,
+      metalness: 0.6,
+      roughness: 0.3,
+      side: THREE.DoubleSide,
+    });
+    const dish = new THREE.Mesh(dishGeo, dishMat);
+    dish.rotation.x = -Math.PI / 3;
+    dish.position.set(0, 5.2, 0);
+    commsGroup.add(dish);
+
+    const hornGeo = new THREE.CylinderGeometry(0.04, 0.08, 1.1, 8);
+    hornGeo.rotateX(Math.PI / 2);
+    const hornMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const horn = new THREE.Mesh(hornGeo, hornMat);
+    horn.position.set(0, 5.4, 0.7);
+    commsGroup.add(horn);
+
+    commsGroup.position.set(-12, 0, -10);
+    scene.add(commsGroup);
+
+    // ── 7C. 6-Wheeled Martian Pressurized Exploration Rover ───────────────────
+    const roverGroup = new THREE.Group();
+    const bodyGeo = new THREE.BoxGeometry(2.4, 1.1, 3.4);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.5, roughness: 0.4 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.set(0, 1.3, 0);
+    body.castShadow = true;
+    roverGroup.add(body);
+
+    const roofGeo = new THREE.BoxGeometry(2.2, 0.08, 3.0);
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.8 });
+    const roof = new THREE.Mesh(roofGeo, roofMat);
+    roof.position.set(0, 1.9, 0);
+    roverGroup.add(roof);
+
+    // 6 Rocker-Bogie Traction Wheels
+    const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.4, 16);
+    wheelGeo.rotateZ(Math.PI / 2);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const wheelCoords = [
+      [-1.4, 0.45, -1.2], [1.4, 0.45, -1.2],
+      [-1.4, 0.45, 0.0],  [1.4, 0.45, 0.0],
+      [-1.4, 0.45, 1.2],  [1.4, 0.45, 1.2],
+    ];
+    wheelCoords.forEach(([wx, wy, wz]) => {
+      const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+      wheel.position.set(wx, wy, wz);
+      wheel.castShadow = true;
+      roverGroup.add(wheel);
+    });
+
+    // Dual Forward Searchlights
+    const lightGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.12, 12);
+    lightGeo.rotateX(Math.PI / 2);
+    const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    [-0.7, 0.7].forEach(lx => {
+      const headlight = new THREE.Mesh(lightGeo, lightMat);
+      headlight.position.set(lx, 1.3, 1.75);
+      roverGroup.add(headlight);
+    });
+
+    roverGroup.position.set(12, 0, 7.5);
+    roverGroup.rotation.y = -Math.PI / 3.5;
+    scene.add(roverGroup);
+
+    // ── 7D. Life-Support Utility Conduits on Ground ───────────────────────────
+    const conduitMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+
+    const conduitCurve1 = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(5.0, 0.12, 0),
+      new THREE.Vector3(5.6, 0.12, -3.5),
+      new THREE.Vector3(6.0, 0.12, -7.0),
+    ]);
+    scene.add(new THREE.Mesh(new THREE.TubeGeometry(conduitCurve1, 24, 0.14, 8, false), conduitMat));
+
+    const conduitCurve2 = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-4.8, 0.12, 1.0),
+      new THREE.Vector3(-6.8, 0.12, 2.4),
+      new THREE.Vector3(-9.0, 0.12, 4.0),
+    ]);
+    scene.add(new THREE.Mesh(new THREE.TubeGeometry(conduitCurve2, 24, 0.14, 8, false), conduitMat));
+
+    // ── 7E. Authentic Martian Rover Twin Tire Tracks ─────────────────────────
     const trackGroup = new THREE.Group();
     const trackMat = new THREE.MeshStandardMaterial({
       color: 0x3d1711,
@@ -487,7 +658,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     });
     scene.add(trackGroup);
 
-    // ── 7C. Horizon Atmospheric Dust Haze Ring (Mie Scattering) ───────────────
+    // ── 7F. Horizon Atmospheric Dust Haze Ring (Mie Scattering) ───────────────
     const hazeGeo = new THREE.CylinderGeometry(70, 70, 18, 36, 1, true);
     const hazeMat = new THREE.MeshBasicMaterial({
       color: surfaceData.terrain3DConfig.skyColorHex,
@@ -500,7 +671,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     hazeMesh.position.set(0, 8, 0);
     scene.add(hazeMesh);
 
-    // ── 7D. Touchdown Shockwave Reticle Ring ──────────────────────────────────
+    // ── 7G. Touchdown Shockwave Reticle Ring ──────────────────────────────────
     const shockwaveGeo = new THREE.RingGeometry(0.8, 1.4, 32);
     shockwaveGeo.rotateX(-Math.PI / 2);
     const shockwaveMat = new THREE.MeshBasicMaterial({
@@ -513,34 +684,131 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     shockwaveRing.position.set(0, 0.08, 0);
     scene.add(shockwaveRing);
 
-    // ── 8. Dynamic Martian Dust Storm Particle System ─────────────────────────
-    const dustCount = 1600;
+    // ── 7H. Habitat Dust-Storm Warning Strobe Beacons ─────────────────────────
+    const strobe1 = new THREE.PointLight(0xff6600, 0, 40);
+    strobe1.position.set(0, domeRadius + 0.6, 0);
+    strobe1.visible = false;
+    scene.add(strobe1);
+
+    const strobe2 = new THREE.PointLight(0xffaa00, 0, 30);
+    strobe2.position.set(domeRadius + 2.4, 2.4, 0);
+    strobe2.visible = false;
+    scene.add(strobe2);
+
+    // ── 8. Real Volumetric Organic Dust Storm (No Box Pixels) ──────────────────
+    const softDustTexture = createSoftDustTexture();
+    const sandGrainTexture = createSandGrainTexture();
+
+    // 8A. Atmospheric Billowing Dust Cloud Plumes
+    const dustCount = 2200;
     const dustGeo = new THREE.BufferGeometry();
     const dustPos = new Float32Array(dustCount * 3);
     const dustVel: { x: number; y: number; z: number }[] = [];
 
     for (let d = 0; d < dustCount; d++) {
-      dustPos[d * 3] = (Math.random() - 0.5) * 90;
-      dustPos[d * 3 + 1] = Math.random() * 25;
-      dustPos[d * 3 + 2] = (Math.random() - 0.5) * 90;
+      dustPos[d * 3] = (Math.random() - 0.5) * 110;
+      dustPos[d * 3 + 1] = 0.5 + Math.random() * 32;
+      dustPos[d * 3 + 2] = (Math.random() - 0.5) * 110;
       dustVel.push({
-        x: -0.4 - Math.random() * 0.6, // Strong Martian westward dust gale
-        y: (Math.random() - 0.5) * 0.08,
-        z: (Math.random() - 0.5) * 0.2,
+        x: -0.65 - Math.random() * 0.9, // High-velocity Martian westward gale
+        y: (Math.random() - 0.5) * 0.06,
+        z: (Math.random() - 0.5) * 0.25,
       });
     }
-
     dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
     const dustMat = new THREE.PointsMaterial({
+      map: softDustTexture,
       color: surfaceData.terrain3DConfig.dustStormColorHex,
-      size: 0.8,
+      size: 4.8,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.56,
+      depthWrite: false,
       blending: THREE.NormalBlending,
     });
     const dustParticles = new THREE.Points(dustGeo, dustMat);
     dustParticles.visible = false;
     scene.add(dustParticles);
+
+    // 8B. Ground-Level Saltation Sand Drift (Fast surface sand particles)
+    const saltationCount = 1400;
+    const saltGeo = new THREE.BufferGeometry();
+    const saltPos = new Float32Array(saltationCount * 3);
+    const saltVel: { x: number; y: number; z: number }[] = [];
+
+    for (let s = 0; s < saltationCount; s++) {
+      saltPos[s * 3] = (Math.random() - 0.5) * 90;
+      saltPos[s * 3 + 1] = 0.1 + Math.random() * 2.4;
+      saltPos[s * 3 + 2] = (Math.random() - 0.5) * 90;
+      saltVel.push({
+        x: -1.2 - Math.random() * 1.0,
+        y: (Math.random() - 0.5) * 0.03,
+        z: (Math.random() - 0.5) * 0.15,
+      });
+    }
+    saltGeo.setAttribute('position', new THREE.BufferAttribute(saltPos, 3));
+    const saltMat = new THREE.PointsMaterial({
+      map: sandGrainTexture,
+      color: 0xc86438,
+      size: 1.4,
+      transparent: true,
+      opacity: 0.75,
+      depthWrite: false,
+      blending: THREE.NormalBlending,
+    });
+    const saltationParticles = new THREE.Points(saltGeo, saltMat);
+    saltationParticles.visible = false;
+    scene.add(saltationParticles);
+
+    // 8C. Swirling Martian Dust Devil (Vortex Funnel in background)
+    const devilGroup = new THREE.Group();
+    devilGroup.position.set(-28, 0, 24);
+    const devilCount = 450;
+    const devilGeo = new THREE.BufferGeometry();
+    const devilPos = new Float32Array(devilCount * 3);
+    const devilMeta: { y: number; baseAngle: number; speed: number }[] = [];
+
+    for (let v = 0; v < devilCount; v++) {
+      const y = Math.random() * 18;
+      const baseAngle = Math.random() * Math.PI * 2;
+      const radius = 0.6 + y * 0.35; // Expands outward as height increases
+      devilPos[v * 3] = radius * Math.cos(baseAngle);
+      devilPos[v * 3 + 1] = y;
+      devilPos[v * 3 + 2] = radius * Math.sin(baseAngle);
+      devilMeta.push({ y, baseAngle, speed: 2.2 + Math.random() * 1.5 });
+    }
+    devilGeo.setAttribute('position', new THREE.BufferAttribute(devilPos, 3));
+    const devilMat = new THREE.PointsMaterial({
+      map: softDustTexture,
+      color: 0xba5432,
+      size: 3.4,
+      transparent: true,
+      opacity: 0.62,
+      depthWrite: false,
+    });
+    const devilParticles = new THREE.Points(devilGeo, devilMat);
+    devilGroup.add(devilParticles);
+    devilGroup.visible = false;
+    scene.add(devilGroup);
+
+    // 8D. Drifting Volumetric Wind Sheets
+    const dustSheets: THREE.Mesh[] = [];
+    const sheetGeo = new THREE.PlaneGeometry(35, 12);
+    sheetGeo.rotateY(Math.PI / 2);
+    const sheetMat = new THREE.MeshBasicMaterial({
+      map: softDustTexture,
+      transparent: true,
+      opacity: 0.18,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    for (let sh = 0; sh < 3; sh++) {
+      const sheet = new THREE.Mesh(sheetGeo, sheetMat);
+      sheet.position.set((sh - 1) * 25, 4 + sh * 1.5, (Math.random() - 0.5) * 30);
+      sheet.visible = false;
+      scene.add(sheet);
+      dustSheets.push(sheet);
+    }
 
     // Store references for runtime reactive updates
     sceneElementsRef.current = {
@@ -550,6 +818,12 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       fog,
       domeLights: [interiorDomeLight, warmHabitatLight],
       dustParticles,
+      saltationParticles,
+      dustDevilGroup: devilGroup,
+      dustDevilParticles: devilParticles,
+      dustSheets,
+      strobeLights: [strobe1, strobe2],
+      commsGroup,
       phobosMesh,
       camera,
       controls,
@@ -574,24 +848,77 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         phobosMesh.position.z = 140 * Math.sin(elapsed * 0.04);
       }
 
-      // Animate dust particles during dust storms
-      if (isDustStormRef.current && dustParticles) {
-        const positions = dustParticles.geometry.attributes.position as THREE.BufferAttribute;
-        for (let i = 0; i < dustCount; i++) {
-          let x = positions.getX(i) + dustVel[i].x;
-          let y = positions.getY(i) + dustVel[i].y;
-          let z = positions.getZ(i) + dustVel[i].z;
+      // Slowly steer communications satellite dish
+      if (commsGroup) {
+        commsGroup.rotation.y = Math.sin(elapsed * 0.12) * 0.35;
+      }
 
-          // Wrap around boundary
-          if (x < -45) x = 45;
-          if (y < 0.2) y = 22;
-          if (y > 25) y = 0.5;
-          if (z < -45) z = 45;
-          if (z > 45) z = -45;
-
-          positions.setXYZ(i, x, y, z);
+      // Animate Realistic Volumetric Dust Storm
+      if (isDustStormRef.current) {
+        // Pulse safety warning strobes
+        if (strobe1 && strobe2) {
+          const isStrobeOn = Math.sin(elapsed * 9) > 0.35;
+          const strobeIntensity = isStrobeOn ? 5.0 : 0;
+          strobe1.intensity = strobeIntensity;
+          strobe2.intensity = strobeIntensity;
         }
-        positions.needsUpdate = true;
+
+        // A. Atmospheric billows
+        if (dustParticles) {
+          const posAttr = dustParticles.geometry.attributes.position as THREE.BufferAttribute;
+          for (let i = 0; i < dustCount; i++) {
+            let x = posAttr.getX(i) + dustVel[i].x;
+            let y = posAttr.getY(i) + dustVel[i].y + Math.sin(x * 0.2 + elapsed * 2) * 0.04;
+            let z = posAttr.getZ(i) + dustVel[i].z;
+
+            if (x < -55) x = 55;
+            if (y < 0.3) y = 28;
+            if (y > 32) y = 0.5;
+            if (z < -55) z = 55;
+            if (z > 55) z = -55;
+
+            posAttr.setXYZ(i, x, y, z);
+          }
+          posAttr.needsUpdate = true;
+        }
+
+        // B. Ground saltation sand drift
+        if (saltationParticles) {
+          const saltAttr = saltationParticles.geometry.attributes.position as THREE.BufferAttribute;
+          for (let s = 0; s < saltationCount; s++) {
+            let x = saltAttr.getX(s) + saltVel[s].x;
+            let y = saltAttr.getY(s) + saltVel[s].y;
+            let z = saltAttr.getZ(s) + saltVel[s].z;
+
+            if (x < -45) x = 45;
+            if (y < 0.08) y = 2.2;
+            if (y > 2.5) y = 0.1;
+            if (z < -45) z = 45;
+            if (z > 45) z = -45;
+
+            saltAttr.setXYZ(s, x, y, z);
+          }
+          saltAttr.needsUpdate = true;
+        }
+
+        // C. Swirling Dust Devil
+        if (devilParticles && devilGroup) {
+          devilGroup.rotation.y += 0.06;
+          const dAttr = devilParticles.geometry.attributes.position as THREE.BufferAttribute;
+          for (let v = 0; v < devilCount; v++) {
+            const meta = devilMeta[v];
+            const currentAngle = meta.baseAngle + elapsed * meta.speed;
+            const r = 0.6 + meta.y * 0.35;
+            dAttr.setXYZ(v, r * Math.cos(currentAngle), meta.y, r * Math.sin(currentAngle));
+          }
+          dAttr.needsUpdate = true;
+        }
+
+        // D. Drifting dust sheets
+        dustSheets.forEach((sheet, idx) => {
+          sheet.position.x -= (0.5 + idx * 0.2);
+          if (sheet.position.x < -60) sheet.position.x = 60;
+        });
       }
 
       // Smooth descent camera transition when entering from orbit
@@ -599,7 +926,6 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         const elapsedDescent = performance.now() - descentStartTimeRef.current;
         const dur = 2400;
         const rawT = Math.min(1, elapsedDescent / dur);
-        // Smooth cubic ease out
         const easeOutT = 1 - Math.pow(1 - rawT, 3);
 
         const startPos = new THREE.Vector3(0, 32, 38);
