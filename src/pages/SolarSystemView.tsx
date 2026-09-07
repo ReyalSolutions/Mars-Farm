@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { nasaService, PlanetData } from '../services/nasaService';
+import { marsAudioService } from '../services/marsAudioService';
 import { MARS_LOCATIONS } from '../data/marsLocations';
 import {
   NOTABLE_ASTEROIDS, FAMOUS_COMETS, DETAILED_MOONS, HISTORIC_SPACECRAFT,
@@ -920,6 +921,9 @@ export const SolarSystemView: React.FC = () => {
     // 2. Lock camera tracking target to Mars
     focusedBodyIdRef.current = 'mars';
     setFocusedBodyId('mars');
+
+    // Trigger authentic EDL re-entry audio simulation
+    marsAudioService.startDescentAudio();
 
     if (!controlsRef.current) {
       navigate(`/surface/${loc.id}?descent=1`);
@@ -2295,6 +2299,7 @@ export const SolarSystemView: React.FC = () => {
         if (rawT >= 1) {
           edlSequenceRef.current = null;
           setEdlSequence(null);
+          marsAudioService.stopDescentAudio();
           navigate(`/surface/${edl.location.id}?descent=1`);
           return;
         }
@@ -3568,6 +3573,7 @@ export const SolarSystemView: React.FC = () => {
               onClick={() => {
                 edlSequenceRef.current = null;
                 setEdlSequence(null);
+                marsAudioService.stopDescentAudio();
                 navigate(`/surface/${edlSequence.location.id}?descent=1`);
               }}
               className="px-3.5 py-1.5 rounded-xl bg-black/80 hover:bg-black text-slate-300 hover:text-white border border-white/20 text-xs font-mono transition-all backdrop-blur-md cursor-pointer flex items-center gap-1.5 shadow-lg"

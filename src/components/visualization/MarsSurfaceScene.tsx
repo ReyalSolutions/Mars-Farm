@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MarsSurfaceDetail } from '../../data/marsSurfaceData';
-import { Sun, Moon, Wind, Eye, Compass, Sparkles } from 'lucide-react';
+import { marsAudioService } from '../../services/marsAudioService';
+import { Sun, Moon, Wind, Eye, Compass, Sparkles, Volume2, VolumeX } from 'lucide-react';
 
 interface MarsSurfaceSceneProps {
   surfaceData: MarsSurfaceDetail;
@@ -73,6 +74,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   const [isDustStormActive, setIsDustStormActive] = useState<boolean>(false);
   const [cameraMode, setCameraMode] = useState<'orbit' | 'firstPerson'>('orbit');
   const [descentNotification, setDescentNotification] = useState<boolean>(isDescending);
+  const [isAudioMuted, setIsAudioMuted] = useState<boolean>(marsAudioService.getMuted());
 
   // References to keep Three.js animation cycle updated without recreating WebGL context
   const timeOfSolRef = useRef<'day' | 'sunset' | 'night'>('day');
@@ -80,6 +82,32 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   const cameraModeRef = useRef<'orbit' | 'firstPerson'>('orbit');
   const isDescendingRef = useRef<boolean>(isDescending);
   const descentStartTimeRef = useRef<number>(performance.now());
+
+  // Surface soundscape and EDL descent audio orchestration
+  useEffect(() => {
+    if (isDescendingRef.current) {
+      marsAudioService.startDescentAudio();
+    } else {
+      marsAudioService.startSurfaceAudio(surfaceData.locationId, isDustStormActive);
+    }
+
+    return () => {
+      marsAudioService.stopDescentAudio();
+      marsAudioService.stopSurfaceAudio();
+    };
+  }, [surfaceData.locationId]);
+
+  const handleToggleAudio = () => {
+    const next = marsAudioService.toggleMute();
+    setIsAudioMuted(next);
+    if (!next) {
+      if (isDescendingRef.current) {
+        marsAudioService.startDescentAudio();
+      } else {
+        marsAudioService.startSurfaceAudio(surfaceData.locationId, isDustStormActive);
+      }
+    }
+  };
 
   const sceneElementsRef = useRef<{
     sunLight?: THREE.DirectionalLight;
@@ -108,6 +136,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   useEffect(() => {
     isDustStormRef.current = isDustStormActive;
     updateDustStormState();
+    marsAudioService.setDustStormAudio(isDustStormActive);
   }, [isDustStormActive]);
 
   useEffect(() => {
@@ -941,6 +970,8 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
 
         if (rawT >= 1) {
           isDescendingRef.current = false;
+          marsAudioService.stopDescentAudio();
+          marsAudioService.startSurfaceAudio(surfaceData.locationId, isDustStormRef.current);
           onDescentComplete?.();
           setTimeout(() => setDescentNotification(false), 3500);
         }
@@ -1053,6 +1084,29 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
           </div>
           <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-black/50 font-bold">
             {isDustStormActive ? 'TAU 3.2' : 'CLEAR'}
+          </span>
+        </button>
+
+        {/* Realistic Martian Soundscape & Music Toggle */}
+        <button
+          onClick={handleToggleAudio}
+          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono backdrop-blur-md border transition-all ${
+            isAudioMuted
+              ? 'bg-space-950/85 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+              : 'bg-cyan-950/80 border-cyan-500/60 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+          }`}
+          title={isAudioMuted ? 'Enable authentic Martian atmospheric acoustics & site music' : 'Mute Martian soundscape'}
+        >
+          <div className="flex items-center gap-2">
+            {isAudioMuted ? (
+              <VolumeX className="w-4 h-4 text-slate-400" />
+            ) : (
+              <Volume2 className="w-4 h-4 text-cyan-400 animate-pulse" />
+            )}
+            <span>{isAudioMuted ? 'Sound Muted' : 'Acoustics'}</span>
+          </div>
+          <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-black/50 font-bold">
+            {isAudioMuted ? 'OFF' : 'LIVE'}
           </span>
         </button>
 
