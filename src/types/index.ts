@@ -4,7 +4,7 @@ export interface MarsLocation {
   id: string;
   name: string;
   arabicOrAncientName?: string;
-  type: 'Crater' | 'Volcanic Plain' | 'Canyon' | 'Planitia' | 'Polar Basin';
+  type: 'Crater' | 'Volcanic Plain' | 'Canyon' | 'Planitia' | 'Polar Basin' | 'Martian Moon';
   latitude: number; // degrees (-90 to 90)
   longitude: number; // degrees (-180 to 180)
   elevationKm: number; // relative to Mars datum

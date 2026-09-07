@@ -95,7 +95,9 @@ class MarsAudioService {
 
   // ── 1. Atmospheric Entry, Descent & Landing (EDL) Audio ─────────────────────
 
-  public startDescentAudio() {
+  // ── 1. Atmospheric Entry, Descent & Landing (EDL) Audio ─────────────────────
+
+  public startDescentAudio(isMoon: boolean = false) {
     const ctx = this.getAudioContext();
     if (!ctx) return;
     this.stopDescentAudio();
@@ -107,7 +109,7 @@ class MarsAudioService {
       masterGain.gain.exponentialRampToValueAtTime(this.isMuted ? 0.0001 : 0.28, now + 0.4);
       masterGain.connect(ctx.destination);
 
-      // A. Hypersonic Re-entry Roar (Filtered White/Brownian noise with Doppler sweep)
+      // A. Hypersonic Re-entry / Orbital Retro-Thrusters
       const bufferSize = ctx.sampleRate * 3;
       const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = noiseBuffer.getChannelData(0);
@@ -124,27 +126,33 @@ class MarsAudioService {
       noiseSource.buffer = noiseBuffer;
       noiseSource.loop = true;
 
-      // Filter sweeps from 180Hz (upper atmosphere) up to 850Hz (peak plasma) then down to 220Hz (parachutes)
+      // Filter sweeps: On Mars from 160Hz up to 950Hz (plasma); On Moons, low pulsed retro-thrusters (110Hz to 320Hz)
       const noiseFilter = ctx.createBiquadFilter();
       noiseFilter.type = 'lowpass';
-      noiseFilter.frequency.setValueAtTime(160, now);
-      noiseFilter.frequency.exponentialRampToValueAtTime(950, now + 1.2);
-      noiseFilter.frequency.exponentialRampToValueAtTime(240, now + 2.7);
+      if (isMoon) {
+        noiseFilter.frequency.setValueAtTime(110, now);
+        noiseFilter.frequency.exponentialRampToValueAtTime(320, now + 1.4);
+        noiseFilter.frequency.exponentialRampToValueAtTime(140, now + 2.7);
+      } else {
+        noiseFilter.frequency.setValueAtTime(160, now);
+        noiseFilter.frequency.exponentialRampToValueAtTime(950, now + 1.2);
+        noiseFilter.frequency.exponentialRampToValueAtTime(240, now + 2.7);
+      }
 
       const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.3, now);
+      noiseGain.gain.setValueAtTime(isMoon ? 0.16 : 0.3, now);
 
       noiseSource.connect(noiseFilter);
       noiseFilter.connect(noiseGain);
       noiseGain.connect(masterGain);
       noiseSource.start();
 
-      // B. Sub-bass Atmospheric Friction Rumble (42 Hz sine)
+      // B. Sub-bass Descent Core Rumble (36 - 44 Hz sine)
       const subOsc = ctx.createOscillator();
       const subGain = ctx.createGain();
       subOsc.type = 'sine';
-      subOsc.frequency.setValueAtTime(44, now);
-      subOsc.frequency.linearRampToValueAtTime(36, now + 2.5);
+      subOsc.frequency.setValueAtTime(isMoon ? 38 : 44, now);
+      subOsc.frequency.linearRampToValueAtTime(32, now + 2.6);
 
       subGain.gain.setValueAtTime(0.35, now);
       subGain.gain.exponentialRampToValueAtTime(0.02, now + 2.7);
@@ -153,7 +161,35 @@ class MarsAudioService {
       subGain.connect(masterGain);
       subOsc.start();
 
-      // C. Radar Telemetry Ping Beeps (TRN Terrain Relative Navigation Lock)
+      // C. Futuristic Cinematic Synth Descent Chords (Vangelis / Interstellar Space Suite)
+      const chordNotes = isMoon ? [116.54, 174.61, 233.08, 349.23] : [130.81, 196.0, 261.63, 392.0];
+      chordNotes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const oGain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc.type = idx % 2 === 0 ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.detune.setValueAtTime((idx - 1.5) * 7, now); // Gentle warm chorusing
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(280, now);
+        filter.frequency.exponentialRampToValueAtTime(1200, now + 1.8);
+        filter.frequency.exponentialRampToValueAtTime(350, now + 2.8);
+
+        oGain.gain.setValueAtTime(0.001, now);
+        oGain.gain.exponentialRampToValueAtTime(0.045, now + 0.5);
+        oGain.gain.exponentialRampToValueAtTime(0.001, now + 2.8);
+
+        osc.connect(filter);
+        filter.connect(oGain);
+        oGain.connect(masterGain);
+
+        osc.start(now);
+        osc.stop(now + 2.9);
+      });
+
+      // D. Radar Telemetry Ping Beeps (TRN Terrain Relative Navigation & Lidar Lock)
       let pingCount = 0;
       const pingInterval = window.setInterval(() => {
         if (!this.ctx || this.isMuted) return;
@@ -162,15 +198,15 @@ class MarsAudioService {
           const pingOsc = this.ctx.createOscillator();
           const pGain = this.ctx.createGain();
           pingOsc.type = 'sine';
-          const freq = 1200 + pingCount * 80;
+          const freq = isMoon ? 1400 + (pingCount % 4) * 120 : 1200 + pingCount * 80;
           pingOsc.frequency.setValueAtTime(freq, t);
-          pGain.gain.setValueAtTime(0.035, t);
-          pGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+          pGain.gain.setValueAtTime(0.04, t);
+          pGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
 
           pingOsc.connect(pGain);
           pGain.connect(masterGain);
           pingOsc.start(t);
-          pingOsc.stop(t + 0.08);
+          pingOsc.stop(t + 0.09);
           pingCount++;
         } catch {}
       }, 450);
@@ -235,6 +271,10 @@ class MarsAudioService {
         return [55.0, 110.0, 130.81, 220.0]; // A1, A2, C3, A3 (Canyon reverb abyss)
       case 'arcadia-planitia':
         return [87.31, 130.81, 174.61, 261.63]; // F2, C3, F3, C4 (Warm human pioneer major chords)
+      case 'phobos':
+        return [58.27, 116.54, 155.56, 233.08, 349.23, 466.16]; // Bb1, Bb2, Eb3, Bb3, F4, Bb4 (Deep cosmic orbital mystery)
+      case 'deimos':
+        return [69.30, 103.83, 138.59, 207.65, 277.18, 415.30]; // C#2, G#2, C#3, G#3, C#4, G#4 (Orbital serenity)
       default:
         return [73.42, 110.0, 174.61, 293.66];
     }
@@ -243,6 +283,8 @@ class MarsAudioService {
   public startSurfaceAudio(locationId: string, isDustStorm: boolean = false) {
     const ctx = this.getAudioContext();
     if (!ctx) return;
+
+    const isMoon = locationId === 'phobos' || locationId === 'deimos';
 
     // If already playing this site, just update the dust storm state
     if (this.surfaceNodes.locationId === locationId && this.surfaceNodes.masterGain) {
@@ -259,8 +301,7 @@ class MarsAudioService {
       masterGain.gain.exponentialRampToValueAtTime(this.isMuted ? 0.0001 : 0.22, now + 1.2);
       masterGain.connect(ctx.destination);
 
-      // A. Ambient Martian Wind (Low-pressure CO2 bandpass filter)
-      // NASA Perseverance mic measurements: Wind creates muffled hollow acoustic profile
+      // A. Ambient Wind (Martian CO2 atmosphere vs Moon Spacecraft Life-Support ventilation)
       const bufferSize = ctx.sampleRate * 4;
       const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const windData = noiseBuffer.getChannelData(0);
@@ -279,11 +320,14 @@ class MarsAudioService {
 
       const windFilter = ctx.createBiquadFilter();
       windFilter.type = 'lowpass';
-      // Low cut-off on calm Martian sol
-      windFilter.frequency.setValueAtTime(isDustStorm ? 480 : 160, now);
+      if (isMoon) {
+        windFilter.frequency.setValueAtTime(isDustStorm ? 180 : 80, now);
+      } else {
+        windFilter.frequency.setValueAtTime(isDustStorm ? 480 : 160, now);
+      }
 
       const windGain = ctx.createGain();
-      windGain.gain.setValueAtTime(isDustStorm ? 0.65 : 0.22, now);
+      windGain.gain.setValueAtTime(isMoon ? (isDustStorm ? 0.15 : 0.05) : (isDustStorm ? 0.65 : 0.22), now);
 
       windSource.connect(windFilter);
       windFilter.connect(windGain);

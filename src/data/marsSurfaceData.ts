@@ -27,9 +27,9 @@ export interface MarsSurfaceDetail {
   geologicalContext: string;
   agriculturalAssessment: {
     suitabilityScore: number;
-    waterAccessRating: 'Abundant Ice Sheet' | 'Moderate Subsurface' | 'Deep Extraction';
-    lightingCondition: 'High Equatorial' | 'Balanced Mid-Latitude' | 'Sub-optimal Polar';
-    thermalShieldingNeed: 'Moderate (Canyon buffer)' | 'Extreme (Auxiliary nuclear required)' | 'Natural Lava Tube Insulation';
+    waterAccessRating: 'Abundant Ice Sheet' | 'Moderate Subsurface' | 'Deep Extraction' | 'Hydrated Phyllosilicate / Volatiles Baking';
+    lightingCondition: 'High Equatorial' | 'Balanced Mid-Latitude' | 'Sub-optimal Polar' | 'Unfiltered Cosmic Sunlight (Zero Atmosphere)';
+    thermalShieldingNeed: 'Moderate (Canyon buffer)' | 'Extreme (Auxiliary nuclear required)' | 'Natural Lava Tube Insulation' | 'Extreme Vacuum & Microgravity Containment';
     recommendedCrops: string[];
     caloricHarvestMultiplier: number;
   };
@@ -44,6 +44,9 @@ export interface MarsSurfaceDetail {
     hasLavaTubes?: boolean;
     hasCanyonWalls?: boolean;
     hasIceFrost?: boolean;
+    isMoon?: boolean;
+    moonType?: 'phobos' | 'deimos';
+    gravityMss?: number;
   };
   images: NasaSurfaceImage[];
 }
@@ -517,6 +520,175 @@ export const MARS_SURFACE_DATA: Record<string, MarsSurfaceDetail> = {
         imageUrl: 'https://images-assets.nasa.gov/image/PIA23684/PIA23684~medium.jpg',
         thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA23684/PIA23684~thumb.jpg',
         fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA23684.jpg',
+      }
+    ]
+  },
+
+  'phobos': {
+    locationId: 'phobos',
+    name: 'Phobos (Stickney Crater Outpost)',
+    ancientName: 'Inner Martian Moon · Fear / Orbit: 9,376 km',
+    coordinates: '9.23° N, 55.1° W (Stickney Meridian)',
+    elevation: '0.0 km (Microgravity Hydrostatic Center)',
+    atmosphericPressureKpa: 0.000,
+    temperatureRangeC: { min: -112, max: -4, mean: -40 },
+    solarFluxWm2: 178,
+    waterIceDepthMeters: 'Subsurface carbonaceous phyllosilicates (0.5% - 2% H2O equivalent)',
+    radiationDoseMsvYear: 1240,
+    dustOpticalDepthTau: 0.00,
+    geologicalContext:
+      'The innermost and largest moon of Mars, orbiting only 6,000 km above the Martian atmosphere. Phobos is tidally locked, heavily cratered, and covered in deep low-albedo regolith. The colossal 9-km Stickney Crater dominates its surface alongside deep parallel grooves. Microgravity is an ultra-low 0.0057 m/s² (0.00058g). Mars looms overwhelmingly across 42° of the sky, creating a breathtaking celestial backdrop.',
+    agriculturalAssessment: {
+      suitabilityScore: 70,
+      waterAccessRating: 'Hydrated Phyllosilicate / Volatiles Baking',
+      lightingCondition: 'Unfiltered Cosmic Sunlight (Zero Atmosphere)',
+      thermalShieldingNeed: 'Extreme Vacuum & Microgravity Containment',
+      recommendedCrops: ['Spirulina platensis (Photobioreactor Algae)', 'Chlorella vulgaris', 'Lemna minor (Duckweed in Centrifuge)'],
+      caloricHarvestMultiplier: 1.35,
+    },
+    terrain3DConfig: {
+      groundColorHex: 0x3a3836,
+      skyColorHex: 0x020205,
+      fogDensity: 0.0001,
+      roughness: 0.94,
+      boulderDensity: 'heavy',
+      craterRimScale: 3.2,
+      dustStormColorHex: 0x554477,
+      isMoon: true,
+      moonType: 'phobos',
+      gravityMss: 0.0057,
+    },
+    images: [
+      {
+        id: 'phobos-hirise-stickney-color',
+        title: 'MRO HiRISE True-Color Portrait: Stickney Crater & Grooves',
+        mission: 'NASA Mars Reconnaissance Orbiter',
+        instrument: 'HiRISE (High Resolution Imaging Science Experiment)',
+        solOrDate: 'Orbit 26,894 (True-Color)',
+        credit: 'NASA / JPL-Caltech / University of Arizona',
+        description:
+          'Spectacular true-color observation of Phobos captured by MRO HiRISE. Highlights the colossal 9-km Stickney Crater with prominent landslide deposits, exposed blue-tinted boulders, and radiating stress fracture grooves.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA10368/PIA10368~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA10368/PIA10368~thumb.jpg',
+        fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA10368.jpg',
+      },
+      {
+        id: 'phobos-mars-express-hrsc-stickney',
+        title: 'Mars Express HRSC 3D Horizon Panorama of Stickney Rim',
+        mission: 'ESA / NASA Mars Express & MRO',
+        instrument: 'High Resolution Stereo Camera (HRSC)',
+        solOrDate: 'Flyby Orbit 756',
+        credit: 'ESA / DLR / FU Berlin / NASA',
+        description:
+          'Ultra-high-resolution perspective of the Stickney Crater rim towering 1,200 meters above the crater floor. Shows ancient impact ejecta blankets and parallel seismic trenches.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA10369/PIA10369~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA10369/PIA10369~thumb.jpg',
+        fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA10369.jpg',
+        isPanorama: true,
+      },
+      {
+        id: 'phobos-mgs-moc-boulders',
+        title: 'Mars Global Surveyor MOC Close-up: Monoliths & Regolith',
+        mission: 'NASA Mars Global Surveyor',
+        instrument: 'Mars Orbiter Camera (MOC)',
+        solOrDate: 'MGS Orbit 551',
+        credit: 'NASA / JPL-Caltech / Malin Space Science Systems',
+        description:
+          'Sub-meter resolution survey of Phobos demonstrating loose particulate regolith and house-sized boulders resting on microgravity slopes near the Phobos Monolith.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA04285/PIA04285~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA04285/PIA04285~thumb.jpg',
+        fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA04285.jpg',
+      },
+      {
+        id: 'phobos-viking-mars-limb',
+        title: 'Viking 1 Orbiter: Phobos Silhouette Above Martian Horizon',
+        mission: 'NASA Viking 1 Orbiter',
+        instrument: 'Visual Imaging Subsystem (VIS)',
+        solOrDate: 'Mission Year 1977',
+        credit: 'NASA / JPL',
+        description:
+          'Historic perspective showing Phobos suspended over the rust-red curved limb of Mars and its delicate blue atmospheric hazes, illustrating the view looking upward from the moon.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA00404/PIA00404~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA00404/PIA00404~thumb.jpg',
+        fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA00404.jpg',
+      }
+    ]
+  },
+
+  'deimos': {
+    locationId: 'deimos',
+    name: 'Deimos (Swift Crater Vantage)',
+    ancientName: 'Outer Martian Moon · Dread / Synchronous Orbit: 23,463 km',
+    coordinates: '12.5° N, 35.2° E (Sub-Mars Meridian)',
+    elevation: '0.0 km (Microgravity Hydrostatic Center)',
+    atmosphericPressureKpa: 0.000,
+    temperatureRangeC: { min: -120, max: -4, mean: -40 },
+    solarFluxWm2: 178,
+    waterIceDepthMeters: 'Subsurface carbonaceous clays & deep volatile deposits',
+    radiationDoseMsvYear: 1280,
+    dustOpticalDepthTau: 0.00,
+    geologicalContext:
+      'The smaller and outer moon of Mars. Unlike jagged Phobos, Deimos appears softly rounded and enveloped by an extensive blanket of pulverized regolith up to 100 meters thick. Craters Swift and Voltaire are cushioned by fine dust. Historic 2023 100-km flybys by the UAE Hope Probe revealed a composition identical to Mars basaltic crust rather than a captured asteroid. Surface gravity is an ethereal 0.003 m/s².',
+    agriculturalAssessment: {
+      suitabilityScore: 68,
+      waterAccessRating: 'Hydrated Phyllosilicate / Volatiles Baking',
+      lightingCondition: 'Unfiltered Cosmic Sunlight (Zero Atmosphere)',
+      thermalShieldingNeed: 'Extreme Vacuum & Microgravity Containment',
+      recommendedCrops: ['Centrifugal Hydroponic Microgreens', 'Dunaliella salina', 'Spirulina platensis'],
+      caloricHarvestMultiplier: 1.30,
+    },
+    terrain3DConfig: {
+      groundColorHex: 0x4a4440,
+      skyColorHex: 0x020205,
+      fogDensity: 0.0001,
+      roughness: 0.82,
+      boulderDensity: 'sparse',
+      craterRimScale: 1.6,
+      dustStormColorHex: 0x443366,
+      isMoon: true,
+      moonType: 'deimos',
+      gravityMss: 0.003,
+    },
+    images: [
+      {
+        id: 'deimos-hirise-color-portrait',
+        title: 'MRO HiRISE True-Color Observation of Deimos Mantle',
+        mission: 'NASA Mars Reconnaissance Orbiter',
+        instrument: 'HiRISE Camera',
+        solOrDate: 'Orbit 15,221',
+        credit: 'NASA / JPL-Caltech / University of Arizona',
+        description:
+          'True-color observation of Deimos revealing its continuous layer of fine-grained regolith. Prominent bright streaks indicate downslope mass movement on low-gravity crater flanks.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA11826/PIA11826~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA11826/PIA11826~thumb.jpg',
+        fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA11826.jpg',
+      },
+      {
+        id: 'deimos-hope-probe-close-flyby',
+        title: 'UAE Hope Probe Historic 100-km Ultra-Close Flyby (2023)',
+        mission: 'Emirates Mars Mission (Hope Probe) / NASA DSN',
+        instrument: 'Emirates Exploration Imager (EXI)',
+        solOrDate: 'Historic Close Flyby March 2023',
+        credit: 'MBRSC / UAE Space Agency / LASP / NASA DSN',
+        description:
+          'Historic high-resolution multi-spectral observation captured from only 100 km above Deimos, demonstrating that its regolith originated from Martian planetary basalt rather than a captured asteroid.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA25920/PIA25920~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA25920/PIA25920~thumb.jpg',
+        fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA25920.jpg',
+      },
+      {
+        id: 'deimos-viking-swift-panorama',
+        title: 'Viking 2 Orbiter: Swift Crater & Regolith Cushion Vista',
+        mission: 'NASA Viking 2 Orbiter',
+        instrument: 'Visual Imaging Subsystem (VIS)',
+        solOrDate: 'Orbit 423',
+        credit: 'NASA / JPL',
+        description:
+          'Panoramic view of Swift Crater (1 km diameter) displaying softened, rounded contours smoothed by millennia of electrostatic dust redeposition. Ideal terrain for tethered surface bio-domes.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA00030/PIA00030~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA00030/PIA00030~thumb.jpg',
+        fallbackUrl: 'https://photojournal.jpl.nasa.gov/jpeg/PIA00030.jpg',
+        isPanorama: true,
       }
     ]
   }

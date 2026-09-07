@@ -198,5 +198,71 @@ export const MARS_LOCATIONS: MarsLocation[] = [
       'Moderate winter lighting constraints',
       'Requires continuous dust filtering on solar tracking mounts'
     ]
+  },
+  {
+    id: 'phobos',
+    name: 'Phobos (Stickney Crater Outpost)',
+    arabicOrAncientName: 'Inner Martian Moon · Stickney Rim',
+    type: 'Martian Moon',
+    latitude: 9.23,
+    longitude: -55.1,
+    elevationKm: 0.0,
+    temperatureMeanC: -40,
+    temperatureMinC: -112,
+    temperatureMaxC: -4,
+    solarIrradianceWm2: 178,
+    solarPotentialScore: 90,
+    waterIcePotential: 'Low',
+    waterPotentialScore: 52,
+    radiationLevel: 'Extreme',
+    radiationScore: 45,
+    dustStormRisk: 'Low',
+    dustRiskScore: 98,
+    terrainScore: 72,
+    sourceDataset: 'NASA Mars Reconnaissance Orbiter HiRISE & ESA Mars Express HRSC',
+    sourceType: 'NASA MOLA / TES / InSight / Mars Odyssey',
+    description: 'Innermost and largest moon of Mars, orbiting only 6,000 km above the Martian cloud tops. Features the colossal 9-km Stickney Crater and parallel stress groove fractures. Mars looms across 42° of the celestial dome with minimal escape velocity (11 m/s) ideal for orbital supply staging and microgravity agricultural research.',
+    advantages: [
+      'Ultra-low delta-v escape velocity (11 m/s) makes cargo transfer and interplanetary transport effortless',
+      'Gigantic Mars disk permanently dominates the sky providing continuous line-of-sight and thermal relay',
+      'Carbonaceous chondrite regolith containing phyllosilicates, organic compounds, and volatile hydration'
+    ],
+    challenges: [
+      'Microgravity (0.0057 m/s²) requires centrifugal artificial-gravity modules for hydroponic roots and bio-fluids',
+      'Extreme cosmic radiation and solar flares with zero natural atmosphere'
+    ]
+  },
+  {
+    id: 'deimos',
+    name: 'Deimos (Swift Crater Vantage)',
+    arabicOrAncientName: 'Outer Martian Moon · Smooth Plains',
+    type: 'Martian Moon',
+    latitude: 12.5,
+    longitude: 35.2,
+    elevationKm: 0.0,
+    temperatureMeanC: -40,
+    temperatureMinC: -120,
+    temperatureMaxC: -4,
+    solarIrradianceWm2: 178,
+    solarPotentialScore: 92,
+    waterIcePotential: 'Low',
+    waterPotentialScore: 48,
+    radiationLevel: 'Extreme',
+    radiationScore: 42,
+    dustStormRisk: 'Low',
+    dustRiskScore: 99,
+    terrainScore: 86,
+    sourceDataset: 'UAE Hope Probe EXI (2023 100km Flyby) & NASA Viking 2 Orbiter',
+    sourceType: 'NASA MOLA / TES / InSight / Mars Odyssey',
+    description: 'Outer moon of Mars enveloped by a smooth, continuous blanket of pulverized regolith up to 100 meters deep. Craters Swift and Voltaire are softened by fine dust, creating gentle undulating terrain ideal for tethered surface arrays and long-baseline communications with Earth.',
+    advantages: [
+      'Smooth, cushioned regolith blanket minimizes jagged boulder landing hazards',
+      'Stable synchronous orbit (30.3 hours) provides near-stationary orbital observation of Mars',
+      'Zero atmospheric dust storms allowing uninterrupted solar harvesting at 178 W/m²'
+    ],
+    challenges: [
+      'Negligible surface gravity (0.003 m/s²) requires anchor harpoons and spin habitats',
+      'Extreme diurnal thermal swings (-120°C to -4°C) without atmospheric insulation'
+    ]
   }
 ];
