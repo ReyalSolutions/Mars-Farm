@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MarsSurfaceDetail, NasaSurfaceImage } from '../../data/marsSurfaceData';
 import { marsAudioService } from '../../services/marsAudioService';
-import { Sun, Moon, Wind, Eye, Compass, Sparkles, Volume2, VolumeX, Camera } from 'lucide-react';
+import { Sun, Moon, Wind, Eye, Compass, Sparkles, Volume2, VolumeX, Camera, Globe } from 'lucide-react';
 
 interface MarsSurfaceSceneProps {
   surfaceData: MarsSurfaceDetail;
@@ -602,6 +602,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   const [cameraMode, setCameraMode] = useState<'orbit' | 'firstPerson'>('orbit');
   const [descentNotification, setDescentNotification] = useState<boolean>(isDescending);
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(marsAudioService.getMuted());
+  const [isSatelliteOrthoActive, setIsSatelliteOrthoActive] = useState<boolean>(false);
 
   // References to keep Three.js animation cycle updated without recreating WebGL context
   const timeOfSolRef = useRef<'day' | 'sunset' | 'night'>('day');
@@ -1328,6 +1329,28 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       metalness: 0.04,
       flatShading: false,
     });
+
+    // ── 5A.1 Real Satellite Imagery Draping (NASA Landsat / ASTER / Google Earth Ortho) ──
+    if (surfaceData.satelliteTextureUrl) {
+      const satTexLoader = new THREE.TextureLoader();
+      satTexLoader.setCrossOrigin('anonymous');
+      satTexLoader.load(
+        surfaceData.satelliteTextureUrl,
+        (satTex) => {
+          satTex.colorSpace = THREE.SRGBColorSpace;
+          satTex.wrapS = THREE.ClampToEdgeWrapping;
+          satTex.wrapT = THREE.ClampToEdgeWrapping;
+          terrainMat.map = satTex;
+          terrainMat.needsUpdate = true;
+          setIsSatelliteOrthoActive(true);
+        },
+        undefined,
+        (err) => {
+          console.warn('Real satellite ortho texture fallback to procedural canvas:', err);
+        }
+      );
+    }
+
     const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
     terrainMesh.receiveShadow = true;
     scene.add(terrainMesh);
@@ -2422,6 +2445,19 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
           </span>
         </button>
 
+        {/* Real NASA / Google Earth 3D Satellite Ortho Badge */}
+        {(isSatelliteOrthoActive || surfaceData.satelliteTextureUrl) && (
+          <div
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-mono backdrop-blur-md border bg-emerald-950/80 border-emerald-500/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] shrink-0"
+            title="Real NASA / USGS satellite ortho-imagery active on 3D surface mesh"
+          >
+            <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <Globe className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="hidden sm:inline">NASA Satellite 3D Ortho</span>
+            <span className="sm:hidden text-[10px]">Sat 3D</span>
+          </div>
+        )}
+
         {/* Realistic Acoustic Soundscape & Music Toggle */}
         <button
           onClick={handleToggleAudio}
@@ -2519,6 +2555,14 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
               </>
             )}
           </span>
+          {surfaceData.satelliteTextureUrl && (
+            <>
+              <span className="text-slate-600 hidden lg:inline">|</span>
+              <span className="text-emerald-400 hidden lg:inline font-bold">
+                🛰️ NASA / USGS Satellite Draped
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>
