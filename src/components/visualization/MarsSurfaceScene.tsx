@@ -786,6 +786,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     scene.add(mountainMesh);
 
     // ── 5C. Authentic Perseverance / Curiosity Rover Wheel Tracks ──────────
+    const domeRadius = 4.8;
     const createRoverTracks = () => {
       const trackGroup = new THREE.Group();
       const numSegments = 32;
@@ -937,7 +938,6 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const habitatGroup = new THREE.Group();
 
     // Main Geodesic Bio-Dome
-    const domeRadius = 4.8;
     const domeGeo = new THREE.SphereGeometry(domeRadius, 24, 18, 0, Math.PI * 2, 0, Math.PI / 2);
     const domeMat = new THREE.MeshPhysicalMaterial({
       color: 0x90e8ff,
