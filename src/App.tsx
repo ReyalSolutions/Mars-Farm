@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MissionProvider } from './context/MissionContext';
 import { AudioProvider } from './context/AudioContext';
 import { ToastProvider } from './components/ui/Toast';
@@ -20,12 +20,21 @@ import { SolarSystemView } from './pages/SolarSystemView';
 import { MarsSurfaceView } from './pages/MarsSurfaceView';
 import { AiFarmAdvisorFab } from './components/ui/AiFarmAdvisorFab';
 
+const ScrollToTop: React.FC = () => {
+  const { pathname, search } = useLocation();
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname, search]);
+  return null;
+};
+
 export const App: React.FC = () => {
   return (
     <ToastProvider>
     <AudioProvider>
       <MissionProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <div className="min-h-screen flex flex-col bg-space-950 text-slate-100 font-sans selection:bg-mars-500 selection:text-white">
             <Navbar />
             <div className="flex-1">

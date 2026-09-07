@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { MARS_SURFACE_DATA, MarsSurfaceDetail, NasaSurfaceImage } from '../data/marsSurfaceData';
 import { MARS_LOCATIONS } from '../data/marsLocations';
@@ -29,6 +29,29 @@ export const MarsSurfaceView: React.FC = () => {
   // Active view tab in lower panel
   const [activeTab, setActiveTab] = useState<'imagery' | 'telemetry' | 'geology'>('imagery');
 
+  // Direct ref to the 3D surface simulation container
+  const simulationContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ensure scroll is immediately positioned at the 3D simulation display, never stuck at the footer
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
+    // Focus viewport right on the simulation container on mobile
+    const timer = setTimeout(() => {
+      simulationContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+
+    return () => clearTimeout(timer);
+  }, [activeId, isDescending]);
+
+  // Keep screen focused on the simulation canvas when the descent sequence completes
+  const handleDescentComplete = () => {
+    simulationContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handleSelectLocation = (id: string) => {
     navigate(`/surface/${id}`);
   };
@@ -42,11 +65,11 @@ export const MarsSurfaceView: React.FC = () => {
     <div className="min-h-screen bg-space-950 text-slate-100 flex flex-col selection:bg-mars-500 selection:text-white">
       {/* ── 1. Top Mission Reconnaissance Header ─────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-cyan-500/20 bg-space-950/90 backdrop-blur-lg">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => navigate('/solar-system')}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-400 text-xs font-mono text-slate-300 hover:text-white transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-400 text-xs font-mono text-slate-300 hover:text-white transition-all shadow-sm shrink-0"
               title="Return to Solar System Orbit"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -54,12 +77,13 @@ export const MarsSurfaceView: React.FC = () => {
               <span className="sm:hidden">Orbit</span>
             </button>
 
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono text-cyan-400 uppercase tracking-wider">
-                <MapPin className="w-3 h-3 text-mars-400" />
-                <span>Planetary Surface Reconnaissance · 3D Terrain & NASA Imagery</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono text-cyan-400 uppercase tracking-wider truncate">
+                <MapPin className="w-3 h-3 text-mars-400 shrink-0" />
+                <span className="hidden sm:inline">Planetary Surface Reconnaissance · 3D Terrain & NASA Imagery</span>
+                <span className="sm:hidden">Surface Recon · 3D Terrain</span>
               </div>
-              <h1 className="text-sm sm:text-lg font-bold font-display text-white tracking-tight leading-none mt-0.5">
+              <h1 className="text-sm sm:text-lg font-bold font-display text-white tracking-tight leading-none mt-0.5 truncate">
                 {surfaceData.name} <span className="text-xs font-mono text-slate-400 font-normal hidden md:inline">({surfaceData.ancientName})</span>
               </h1>
             </div>
@@ -71,16 +95,19 @@ export const MarsSurfaceView: React.FC = () => {
               size="sm"
               onClick={handleLaunchAtSite}
               icon={<Rocket className="w-3.5 h-3.5" />}
-              className="py-1.5 px-3 sm:px-4 text-xs shadow-lg shadow-mars-500/20"
+              className="py-1.5 px-2.5 sm:px-4 text-xs shadow-lg shadow-mars-500/20 shrink-0"
             >
               <span className="hidden sm:inline">Establish Colony at this Site</span>
-              <span className="sm:hidden">Launch Mission</span>
+              <span className="sm:hidden">Colony</span>
             </Button>
           </div>
         </div>
 
         {/* ── 2. Landing Site Switcher Bar ───────────────────────────────────── */}
-        <div className="border-t border-slate-800/80 bg-space-900/60 overflow-x-auto no-scrollbar py-1.5 px-3 sm:px-6 lg:px-8">
+        <div
+          className="border-t border-slate-800/80 bg-space-900/60 overflow-x-auto no-scrollbar py-1.5 px-3 sm:px-6 lg:px-8 touch-pan-x"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-max">
             <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1 shrink-0">
               Scouted Landing Sites:
@@ -107,10 +134,17 @@ export const MarsSurfaceView: React.FC = () => {
       </header>
 
       {/* ── 3. Main Split View: 3D Surface Simulation + NASA Surface Dossier ── */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
-        {/* 3D Surface Viewport Canvas Container */}
-        <div className="w-full h-[380px] sm:h-[480px] lg:h-[540px] rounded-2xl sm:rounded-3xl hud-panel border-cyan-500/30 relative overflow-hidden shadow-2xl">
-          <MarsSurfaceScene surfaceData={surfaceData} isDescending={isDescending} />
+      <main className="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-3 sm:py-6 space-y-4 sm:space-y-6">
+        {/* 3D Surface Viewport Canvas Container (Enlarged for mobile exploration) */}
+        <div
+          ref={simulationContainerRef}
+          className="w-full h-[65vh] min-h-[460px] sm:h-[500px] lg:h-[580px] rounded-2xl sm:rounded-3xl hud-panel border-cyan-500/30 relative overflow-hidden shadow-2xl"
+        >
+          <MarsSurfaceScene
+            surfaceData={surfaceData}
+            isDescending={isDescending}
+            onDescentComplete={handleDescentComplete}
+          />
         </div>
 
         {/* ── 4. Surface Dossier Tabs & Intel Panel ──────────────────────────── */}

@@ -1006,20 +1006,20 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
 
   return (
     <div className={`relative w-full h-full overflow-hidden select-none ${className}`}>
-      {/* Three.js Canvas Container */}
-      <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      {/* Three.js Canvas Container with touch-action none for fluid touch gestures */}
+      <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing touch-none" />
 
       {/* Touchdown EDL Confirmed Banner */}
       {descentNotification && (
-        <div className="absolute top-4 left-4 z-20 pointer-events-none animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="px-4 py-2.5 rounded-xl bg-black/90 backdrop-blur-md border border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
-            <div>
-              <p className="text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-bold">
-                EDL SEQUENCE COMPLETE // TOUCHDOWN CONFIRMED
+        <div className="absolute top-2.5 sm:top-4 left-2.5 sm:left-4 z-20 pointer-events-none animate-in fade-in slide-in-from-top-3 duration-500 max-w-[calc(100vw-7rem)] sm:max-w-none">
+          <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-black/90 backdrop-blur-md border border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center gap-2.5 sm:gap-3">
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-bold leading-tight">
+                EDL COMPLETE // TOUCHDOWN
               </p>
-              <p className="text-xs font-bold font-display text-white">
-                {surfaceData.name.toUpperCase()} · SOL 1 EXPLORATION ACTIVE
+              <p className="text-[11px] sm:text-xs font-bold font-display text-white truncate">
+                {surfaceData.name.toUpperCase()} · SOL 1 ACTIVE
               </p>
             </div>
           </div>
@@ -1027,43 +1027,43 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       )}
 
       {/* Surface Controls Floating Toolbar */}
-      <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto">
+      <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4 z-20 flex flex-col items-end gap-1.5 sm:gap-2 pointer-events-auto">
         {/* Time of Sol (Day / Sunset / Night) */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-space-950/85 backdrop-blur-md border border-slate-800 shadow-xl">
+        <div className="flex items-center gap-0.5 sm:gap-1 p-1 rounded-xl bg-space-950/85 backdrop-blur-md border border-slate-800 shadow-xl">
           <button
             onClick={() => setTimeOfSol('day')}
-            className={`p-2 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
+            className={`p-1.5 sm:p-2 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
               timeOfSol === 'day'
                 ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]'
                 : 'text-slate-400 hover:text-white'
             }`}
             title="Martian Midday (Sol 12:00) · 175 W/m²"
           >
-            <Sun className="w-4 h-4" />
+            <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Midday</span>
           </button>
           <button
             onClick={() => setTimeOfSol('sunset')}
-            className={`p-2 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
+            className={`p-1.5 sm:p-2 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
               timeOfSol === 'sunset'
                 ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
                 : 'text-slate-400 hover:text-white'
             }`}
             title="Martian Blue Sunset (Sol 18:30) · Authentic NASA blue halo"
           >
-            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
             <span className="hidden sm:inline">Sunset</span>
           </button>
           <button
             onClick={() => setTimeOfSol('night')}
-            className={`p-2 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
+            className={`p-1.5 sm:p-2 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 ${
               timeOfSol === 'night'
                 ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]'
                 : 'text-slate-400 hover:text-white'
             }`}
             title="Frigid Martian Night (Sol 23:00) · -88°C, Phobos rising"
           >
-            <Moon className="w-4 h-4" />
+            <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Night</span>
           </button>
         </div>
@@ -1071,18 +1071,19 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         {/* Dust Storm Simulation Toggle */}
         <button
           onClick={() => setIsDustStormActive(!isDustStormActive)}
-          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono backdrop-blur-md border transition-all ${
+          className={`flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-mono backdrop-blur-md border transition-all ${
             isDustStormActive
               ? 'bg-red-950/80 border-red-500 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.35)] animate-pulse'
               : 'bg-space-950/85 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
           }`}
           title="Simulate active Martian global dust squall (Optical Depth Tau > 3.0)"
         >
-          <div className="flex items-center gap-2">
-            <Wind className={`w-4 h-4 ${isDustStormActive ? 'text-red-400 animate-spin' : 'text-slate-400'}`} />
-            <span>Dust Storm</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Wind className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isDustStormActive ? 'text-red-400 animate-spin' : 'text-slate-400'}`} />
+            <span className="hidden xs:inline">Dust Storm</span>
+            <span className="xs:hidden">Storm</span>
           </div>
-          <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-black/50 font-bold">
+          <span className="text-[9px] sm:text-[10px] ml-1 sm:ml-2 px-1.5 py-0.5 rounded bg-black/50 font-bold">
             {isDustStormActive ? 'TAU 3.2' : 'CLEAR'}
           </span>
         </button>
@@ -1090,73 +1091,76 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         {/* Realistic Martian Soundscape & Music Toggle */}
         <button
           onClick={handleToggleAudio}
-          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono backdrop-blur-md border transition-all ${
+          className={`flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-mono backdrop-blur-md border transition-all ${
             isAudioMuted
               ? 'bg-space-950/85 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
               : 'bg-cyan-950/80 border-cyan-500/60 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
           }`}
           title={isAudioMuted ? 'Enable authentic Martian atmospheric acoustics & site music' : 'Mute Martian soundscape'}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {isAudioMuted ? (
-              <VolumeX className="w-4 h-4 text-slate-400" />
+              <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
             ) : (
-              <Volume2 className="w-4 h-4 text-cyan-400 animate-pulse" />
+              <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 animate-pulse" />
             )}
-            <span>{isAudioMuted ? 'Sound Muted' : 'Acoustics'}</span>
+            <span className="hidden xs:inline">{isAudioMuted ? 'Sound Muted' : 'Acoustics'}</span>
+            <span className="xs:hidden">{isAudioMuted ? 'Mute' : 'Audio'}</span>
           </div>
-          <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-black/50 font-bold">
+          <span className="text-[9px] sm:text-[10px] ml-1 sm:ml-2 px-1.5 py-0.5 rounded bg-black/50 font-bold">
             {isAudioMuted ? 'OFF' : 'LIVE'}
           </span>
         </button>
 
         {/* Camera Perspective Mode (Drone Orbit vs First-Person Astronaut) */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-space-950/85 backdrop-blur-md border border-slate-800 shadow-xl">
+        <div className="flex items-center gap-0.5 sm:gap-1 p-1 rounded-xl bg-space-950/85 backdrop-blur-md border border-slate-800 shadow-xl">
           <button
             onClick={() => setCameraMode('orbit')}
-            className={`flex-1 p-2 rounded-lg text-xs font-mono transition-all flex items-center justify-center gap-1.5 ${
+            className={`p-1.5 sm:p-2 rounded-lg text-[11px] sm:text-xs font-mono transition-all flex items-center justify-center gap-1.5 ${
               cameraMode === 'orbit'
                 ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.25)]'
                 : 'text-slate-400 hover:text-white'
             }`}
             title="Drone Survey View (Orbit around colony)"
           >
-            <Compass className="w-4 h-4" />
+            <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Drone Orbit</span>
+            <span className="sm:hidden text-[10px]">Orbit</span>
           </button>
           <button
             onClick={() => setCameraMode('firstPerson')}
-            className={`flex-1 p-2 rounded-lg text-xs font-mono transition-all flex items-center justify-center gap-1.5 ${
+            className={`p-1.5 sm:p-2 rounded-lg text-[11px] sm:text-xs font-mono transition-all flex items-center justify-center gap-1.5 ${
               cameraMode === 'firstPerson'
                 ? 'bg-mars-950/80 text-mars-300 border border-mars-500/50 shadow-[0_0_10px_rgba(255,77,46,0.25)]'
                 : 'text-slate-400 hover:text-white'
             }`}
             title="Astronaut Eye Level (1.8m surface perspective)"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Astronaut POV</span>
+            <span className="sm:hidden text-[10px]">POV</span>
           </button>
         </div>
       </div>
 
       {/* Bottom Surface Telemetry HUD Banner */}
-      <div className="absolute bottom-4 left-4 z-20 pointer-events-none max-w-[90vw]">
-        <div className="px-3.5 py-2 rounded-xl bg-space-950/90 backdrop-blur-md border border-slate-800/90 text-xs font-mono text-slate-300 shadow-xl flex flex-wrap items-center gap-x-4 gap-y-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-bio-400 animate-ping" />
+      <div className="absolute bottom-2.5 sm:bottom-4 left-2.5 sm:left-4 right-2.5 sm:right-auto z-20 pointer-events-none max-w-full sm:max-w-[90vw]">
+        <div className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-space-950/90 backdrop-blur-md border border-slate-800/90 text-[10px] sm:text-xs font-mono text-slate-300 shadow-xl flex flex-wrap items-center gap-x-2.5 sm:gap-x-4 gap-y-1">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-bio-400 animate-ping shrink-0" />
             <span className="text-white font-bold">{surfaceData.name}</span>
           </div>
           <span className="text-slate-600">|</span>
           <span className="text-cyan-300">{surfaceData.coordinates}</span>
-          <span className="text-slate-600">|</span>
-          <span className="text-amber-300">{surfaceData.elevation}</span>
+          <span className="text-slate-600 hidden xs:inline">|</span>
+          <span className="text-amber-300 hidden xs:inline">{surfaceData.elevation}</span>
           <span className="text-slate-600 hidden sm:inline">|</span>
           <span className="text-slate-400 hidden sm:inline">
             Pressure: <strong className="text-slate-200">{surfaceData.atmosphericPressureKpa} kPa</strong>
           </span>
           <span className="text-slate-600 hidden md:inline">|</span>
           <span className="text-slate-400 hidden md:inline">
-            Ice Table: <strong className="text-blue-300">{surfaceData.waterIceDepthMeters}</strong>
+            Ice: <strong className="text-blue-300">{surfaceData.waterIceDepthMeters}</strong>
           </span>
         </div>
       </div>
