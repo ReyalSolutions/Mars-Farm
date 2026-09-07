@@ -17,6 +17,7 @@ import { ResultsPage } from './pages/ResultsPage';
 import { SciencePage } from './pages/SciencePage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { SolarSystemView } from './pages/SolarSystemView';
+import { MarsSurfaceView } from './pages/MarsSurfaceView';
 import { AiFarmAdvisorFab } from './components/ui/AiFarmAdvisorFab';
 
 export const App: React.FC = () => {
@@ -32,6 +33,7 @@ export const App: React.FC = () => {
                 {/* Landing & Public Pages */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/solar-system" element={<SolarSystemView />} />
+                <Route path="/surface/:locationId?" element={<MarsSurfaceView />} />
                 <Route path="/science" element={<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SciencePage /></div>} />
                 <Route path="/leaderboard" element={<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><LeaderboardPage /></div>} />
 

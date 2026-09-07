@@ -2382,16 +2382,48 @@ export const SolarSystemView: React.FC = () => {
         </div>
 
         {planet.id === 'mars' && (
-          <button
-            onClick={() => navigate('/mission/location')}
-            className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-mars-600 hover:from-orange-500 hover:to-mars-500 text-white text-xs font-mono transition-all font-bold group cursor-pointer shadow-lg"
-          >
-            <div className="flex items-center gap-2">
-              <Rocket className="w-4 h-4" />
-              <span>Launch Mars Agricultural Mission</span>
+          <div className="space-y-2 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-mars-400 font-bold uppercase tracking-wider">
+                Martian Surface Landing Sites
+              </span>
+              <span className="text-[10px] font-mono text-slate-500">6 Sites</span>
             </div>
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-          </button>
+            <div className="grid grid-cols-2 gap-1.5">
+              {MARS_LOCATIONS.map(loc => (
+                <button
+                  key={loc.id}
+                  onClick={() => navigate(`/surface/${loc.id}`)}
+                  className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-mars-950/40 border border-white/10 hover:border-mars-500/50 text-[11px] font-mono text-slate-300 hover:text-white transition-all text-left group cursor-pointer"
+                >
+                  <span className="truncate">{loc.name.replace(' Crater', '')}</span>
+                  <ChevronRight className="w-3 h-3 text-slate-500 group-hover:text-mars-400 flex-shrink-0 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => navigate('/surface/jezero-crater')}
+              className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-mars-600 hover:from-amber-400 hover:to-mars-500 text-white text-xs font-mono transition-all font-bold group cursor-pointer shadow-[0_0_20px_rgba(249,115,22,0.35)] border border-amber-400/40"
+            >
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-amber-200 animate-pulse" />
+                <span>Explore Surface (3D & NASA Imagery)</span>
+              </div>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+
+            <button
+              onClick={() => navigate('/mission/location')}
+              className="flex items-center justify-between w-full px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-mono transition-all font-bold group cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Rocket className="w-3.5 h-3.5 text-mars-400" />
+                <span>Launch Mars Mission Here</span>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform text-slate-500" />
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -2724,21 +2756,32 @@ export const SolarSystemView: React.FC = () => {
 
         <div className="pt-1 flex flex-col gap-2">
           <button
-            onClick={() => navigate('/mission/location')}
-            className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-mars-600 hover:from-orange-500 hover:to-mars-500 text-white text-xs font-mono font-bold transition-all shadow-[0_0_20px_rgba(255,77,46,0.35)] group cursor-pointer"
+            onClick={() => navigate(`/surface/${loc.id}`)}
+            className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-mars-600 hover:from-amber-400 hover:to-mars-500 text-white text-xs font-mono font-bold transition-all shadow-[0_0_24px_rgba(249,115,22,0.45)] group cursor-pointer border border-amber-400/40"
           >
             <div className="flex items-center gap-2">
-              <Rocket className="w-4 h-4" />
+              <Eye className="w-4 h-4 text-amber-200 animate-pulse" />
+              <span>Descend to Surface (3D & NASA Imagery)</span>
+            </div>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => navigate('/mission/location')}
+            className="flex items-center justify-between w-full px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-mono font-semibold transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Rocket className="w-3.5 h-3.5 text-mars-400" />
               <span>Launch Mission at this Site</span>
             </div>
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform text-slate-500" />
           </button>
 
           <button
             onClick={() => focusOnBody('sun')}
-            className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-xl bg-space-900/80 hover:bg-space-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-mono transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 w-full px-3 py-1.5 rounded-xl bg-space-900/80 hover:bg-space-800 border border-slate-700 text-slate-400 hover:text-slate-200 text-[11px] font-mono transition-colors cursor-pointer"
           >
-            <Globe className="w-3.5 h-3.5 text-cyan-400" />
+            <Globe className="w-3 h-3 text-cyan-400" />
             <span>Center on Solar System Sun</span>
           </button>
         </div>
