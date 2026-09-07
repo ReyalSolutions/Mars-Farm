@@ -144,6 +144,7 @@ export const MarsSurfaceView: React.FC = () => {
             surfaceData={surfaceData}
             isDescending={isDescending}
             onDescentComplete={handleDescentComplete}
+            onInspectNasaImage={setInspectingImage}
           />
         </div>
 

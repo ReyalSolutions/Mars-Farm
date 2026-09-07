@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { MarsSurfaceDetail } from '../../data/marsSurfaceData';
+import { MarsSurfaceDetail, NasaSurfaceImage } from '../../data/marsSurfaceData';
 import { marsAudioService } from '../../services/marsAudioService';
-import { Sun, Moon, Wind, Eye, Compass, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { Sun, Moon, Wind, Eye, Compass, Sparkles, Volume2, VolumeX, Camera } from 'lucide-react';
 
 interface MarsSurfaceSceneProps {
   surfaceData: MarsSurfaceDetail;
@@ -11,6 +11,7 @@ interface MarsSurfaceSceneProps {
   isDescending?: boolean;
   onSceneReady?: () => void;
   onDescentComplete?: () => void;
+  onInspectNasaImage?: (image: NasaSurfaceImage) => void;
 }
 
 // ── Soft Organic Dust & Smoke Puff Canvas Textures (Eliminates Box Pixels) ─────
@@ -421,8 +422,10 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   isDescending = false,
   onSceneReady,
   onDescentComplete,
+  onInspectNasaImage,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const primaryNasaImage = surfaceData.images[0];
   const [timeOfSol, setTimeOfSol] = useState<'day' | 'sunset' | 'night'>('day');
   const [isDustStormActive, setIsDustStormActive] = useState<boolean>(false);
   const [cameraMode, setCameraMode] = useState<'orbit' | 'firstPerson'>('orbit');
@@ -739,7 +742,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     }
     terrainGeo.computeVertexNormals();
 
-    // Generate site-specific realistic textures from NASA imagery
+    // ── 5A. Generate site-specific procedural textures & load real NASA imagery ──
     const { colorTexture, bumpTexture, roughnessTexture } = createSiteRealisticTerrainTextures(surfaceData);
 
     const terrainMat = new THREE.MeshStandardMaterial({
@@ -784,6 +787,77 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const mountainMesh = new THREE.Mesh(mountainRingGeo, mountainMat);
     mountainMesh.position.set(0, 14, 0);
     scene.add(mountainMesh);
+
+    // ── 5C. Load Real NASA Captured Photographic Textures onto Terrain and Horizon ──
+    const texLoader = new THREE.TextureLoader();
+    texLoader.setCrossOrigin('anonymous');
+
+    const groundNasaImage = surfaceData.images.find((img) => !img.isPanorama) || surfaceData.images[0];
+    const panoNasaImage = surfaceData.images.find((img) => img.isPanorama) || surfaceData.images[1] || surfaceData.images[0];
+
+    const loadTextureWithFallback = (
+      primaryUrl: string,
+      fallbackUrl?: string,
+      repeatX = 6,
+      repeatY = 6,
+      onLoaded?: (tex: THREE.Texture) => void
+    ) => {
+      const configureAndNotify = (tex: THREE.Texture) => {
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(repeatX, repeatY);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+        if (onLoaded) onLoaded(tex);
+      };
+
+      texLoader.load(
+        primaryUrl,
+        (tex) => configureAndNotify(tex),
+        undefined,
+        () => {
+          if (fallbackUrl) {
+            texLoader.load(
+              fallbackUrl,
+              (tex) => configureAndNotify(tex),
+              undefined,
+              () => {
+                texLoader.load('/textures/mars_realistic.jpg', (tex) => configureAndNotify(tex));
+              }
+            );
+          } else {
+            texLoader.load('/textures/mars_realistic.jpg', (tex) => configureAndNotify(tex));
+          }
+        }
+      );
+    };
+
+    if (groundNasaImage) {
+      loadTextureWithFallback(
+        groundNasaImage.imageUrl,
+        groundNasaImage.fallbackUrl,
+        6,
+        6,
+        (tex) => {
+          terrainMat.map = tex;
+          terrainMat.needsUpdate = true;
+        }
+      );
+    }
+
+    if (panoNasaImage) {
+      loadTextureWithFallback(
+        panoNasaImage.imageUrl,
+        panoNasaImage.fallbackUrl,
+        2,
+        1,
+        (tex) => {
+          mountainMat.map = tex;
+          mountainMat.color = new THREE.Color(0xffffff);
+          mountainMat.needsUpdate = true;
+        }
+      );
+    }
 
     // ── 5C. Authentic Perseverance / Curiosity Rover Wheel Tracks ──────────
     const domeRadius = 4.8;
@@ -1485,22 +1559,75 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       {/* Three.js Canvas Container with touch-action none for fluid touch gestures */}
       <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing touch-none" />
 
-      {/* Touchdown EDL Confirmed Banner */}
-      {descentNotification && (
-        <div className="absolute top-2.5 sm:top-4 left-2.5 sm:left-4 z-20 pointer-events-none animate-in fade-in slide-in-from-top-3 duration-500 max-w-[calc(100vw-7rem)] sm:max-w-none">
-          <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-black/90 backdrop-blur-md border border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center gap-2.5 sm:gap-3">
-            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-bold leading-tight">
-                EDL COMPLETE // TOUCHDOWN
-              </p>
-              <p className="text-[11px] sm:text-xs font-bold font-display text-white truncate">
-                {surfaceData.name.toUpperCase()} · SOL 1 ACTIVE
-              </p>
+      {/* Top Left HUD: Touchdown Banner + NASA Capture Source Inspector */}
+      <div className="absolute top-2.5 sm:top-4 left-2.5 sm:left-4 z-20 flex flex-col gap-2 max-w-[calc(100vw-7.5rem)] sm:max-w-xs pointer-events-none">
+        {/* Touchdown EDL Confirmed Banner */}
+        {descentNotification && (
+          <div className="animate-in fade-in slide-in-from-top-3 duration-500">
+            <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-black/90 backdrop-blur-md border border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.4)] flex items-center gap-2.5 sm:gap-3">
+              <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-cyan-400 font-bold leading-tight">
+                  EDL COMPLETE // TOUCHDOWN
+                </p>
+                <p className="text-[11px] sm:text-xs font-bold font-display text-white truncate">
+                  {surfaceData.name.toUpperCase()} · SOL 1 ACTIVE
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Authentic NASA Capture Source Badge */}
+        {primaryNasaImage && (
+          <div className="pointer-events-auto">
+            <button
+              onClick={() => onInspectNasaImage?.(primaryNasaImage)}
+              className="w-full text-left p-2 sm:p-2.5 rounded-xl bg-space-950/90 backdrop-blur-md border border-cyan-500/40 hover:border-cyan-400 text-slate-200 transition-all shadow-xl hover:shadow-[0_0_20px_rgba(0,240,255,0.25)] group"
+              title="Click to inspect raw high-resolution NASA PDS observation"
+            >
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-lg overflow-hidden shrink-0 border border-slate-700 group-hover:border-cyan-400/80 transition-colors bg-black">
+                  <img
+                    src={primaryNasaImage.thumbnailUrl || primaryNasaImage.imageUrl}
+                    alt={primaryNasaImage.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (primaryNasaImage.fallbackUrl && target.src !== primaryNasaImage.fallbackUrl) {
+                        target.src = primaryNasaImage.fallbackUrl;
+                      } else {
+                        target.src = '/textures/mars_realistic.jpg';
+                      }
+                    }}
+                  />
+                  <div className="absolute bottom-0.5 right-0.5 p-0.5 rounded bg-black/80 text-cyan-300">
+                    <Camera className="w-2.5 h-2.5" />
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                    <span className="truncate">NASA RAW CAPTURE</span>
+                  </div>
+                  <p className="text-[11px] sm:text-xs font-bold font-display text-white truncate group-hover:text-cyan-300 transition-colors">
+                    {primaryNasaImage.mission}
+                  </p>
+                  <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-mono text-slate-400 truncate">
+                    <span className="text-amber-300 shrink-0">{primaryNasaImage.solOrDate}</span>
+                    <span>•</span>
+                    <span className="truncate">{primaryNasaImage.instrument}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-1.5 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[9px] font-mono text-slate-400 group-hover:text-cyan-300">
+                <span className="text-cyan-400/90 font-medium truncate mr-1">3D Mesh Derived from NASA PDS</span>
+                <span className="underline decoration-cyan-500/50 shrink-0">View Raw ↗</span>
+              </div>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Surface Controls Floating Toolbar */}
       <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4 z-20 flex flex-col items-end gap-1.5 sm:gap-2 pointer-events-auto">
