@@ -4,10 +4,11 @@ export interface MarsLocation {
   id: string;
   name: string;
   arabicOrAncientName?: string;
-  type: 'Crater' | 'Volcanic Plain' | 'Canyon' | 'Planitia' | 'Polar Basin' | 'Martian Moon';
+  type: 'Crater' | 'Volcanic Plain' | 'Canyon' | 'Planitia' | 'Polar Basin' | 'Martian Moon' | 'Earth Station' | 'Lunar Base' | 'Lunar Mare';
+  celestialBody?: 'mars' | 'earth' | 'moon';
   latitude: number; // degrees (-90 to 90)
   longitude: number; // degrees (-180 to 180)
-  elevationKm: number; // relative to Mars datum
+  elevationKm: number; // relative to planet datum
   temperatureMeanC: number; // mean surface temp
   temperatureMinC: number;
   temperatureMaxC: number;
@@ -21,7 +22,7 @@ export interface MarsLocation {
   dustRiskScore: number; // 0-100 (higher = safer / lower risk)
   terrainScore: number; // 0-100 (higher = flatter/easier construction)
   sourceDataset: string;
-  sourceType: 'NASA MOLA / TES / InSight / Mars Odyssey' | 'Simulation Model';
+  sourceType: 'NASA MOLA / TES / InSight / Mars Odyssey' | 'Simulation Model' | 'NASA Landsat / MODIS' | 'NASA LRO / Apollo PDS';
   description: string;
   advantages: string[];
   challenges: string[];

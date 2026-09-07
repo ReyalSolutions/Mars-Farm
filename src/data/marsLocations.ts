@@ -264,5 +264,179 @@ export const MARS_LOCATIONS: MarsLocation[] = [
       'Negligible surface gravity (0.003 m/s²) requires anchor harpoons and spin habitats',
       'Extreme diurnal thermal swings (-120°C to -4°C) without atmospheric insulation'
     ]
+  },
+
+  // ─── 3. Planet Earth Surface Stations & Analogues ────────────────────────────
+  {
+    id: 'kennedy-space-center',
+    name: 'Kennedy Space Center (Space Coast)',
+    arabicOrAncientName: 'Launch Complex 39A · Cape Canaveral',
+    type: 'Earth Station',
+    celestialBody: 'earth',
+    latitude: 28.57,
+    longitude: -80.65,
+    elevationKm: 0.003,
+    temperatureMeanC: 22,
+    temperatureMinC: 10,
+    temperatureMaxC: 33,
+    solarIrradianceWm2: 430,
+    solarPotentialScore: 98,
+    waterIcePotential: 'Very High',
+    waterPotentialScore: 100,
+    radiationLevel: 'Low',
+    radiationScore: 99,
+    dustStormRisk: 'Low',
+    dustRiskScore: 99,
+    terrainScore: 95,
+    sourceDataset: 'NASA Kennedy Space Center Exploration Ground Systems & MODIS Terra',
+    sourceType: 'NASA Landsat / MODIS',
+    description: 'Premier launch hub of NASA human spaceflight, situated along the Florida Atlantic coastline. Home to the Vehicle Assembly Building (VAB), historic Launch Complex 39A/B, and the Space Life Sciences Lab pioneering the Advanced Plant Habitat (APH) and Veggie closed-loop growth chambers.',
+    advantages: [
+      'Sea-level atmospheric pressure (101.3 kPa) with natural nitrogen-oxygen shield and 1.0g gravity',
+      'Direct oceanic water abundance and fully validated terrestrial biological ecosystem',
+      'Direct pipeline to NASA aerospace launch facilities, cleanrooms, and bioregenerative research'
+    ],
+    challenges: [
+      'Subtropical humidity and salt-fog corrosive maritime environment',
+      'Tropical Atlantic storm and hurricane surge vulnerability'
+    ]
+  },
+  {
+    id: 'mauna-kea',
+    name: 'HI-SEAS & Mauna Kea Analogue',
+    arabicOrAncientName: 'Puu Waawaa Basalt Plateau · 4,205m',
+    type: 'Earth Station',
+    celestialBody: 'earth',
+    latitude: 19.82,
+    longitude: -155.47,
+    elevationKm: 4.205,
+    temperatureMeanC: 3,
+    temperatureMinC: -4,
+    temperatureMaxC: 11,
+    solarIrradianceWm2: 520,
+    solarPotentialScore: 100,
+    waterIcePotential: 'Moderate',
+    waterPotentialScore: 78,
+    radiationLevel: 'Low',
+    radiationScore: 95,
+    dustStormRisk: 'Low',
+    dustRiskScore: 99,
+    terrainScore: 82,
+    sourceDataset: 'NASA HI-SEAS Lunar/Mars Analogue & USGS Hawaii Volcano Observatory',
+    sourceType: 'NASA Landsat / MODIS',
+    description: 'High-altitude volcanic desert isolated on the northern slope of Mauna Loa. The red basaltic tephra cinder fields and weathered tholeiitic lavas mimic the mineralogical composition and physical traction of Martian and Lunar regolith, hosting long-duration NASA crewed habitat simulations.',
+    advantages: [
+      'Dry, unweathered basaltic regolith offering exceptional terrestrial planetary mineral analogue',
+      'Superb high-altitude solar irradiance (520 W/m²) with crystal clear atmospheric transmission',
+      'Ideal high-altitude hypoxic training and testing ground for pressurized spacesuit ergonomics'
+    ],
+    challenges: [
+      'Sharp, abrasive a‘ā lava rock causing rapid wear on mobility treads and boots',
+      'Freezing nocturnal temperatures (-4°C) requiring active greenhouse thermal cycling'
+    ]
+  },
+  {
+    id: 'svalbard-vault',
+    name: 'Svalbard Global Seed Vault',
+    arabicOrAncientName: 'Spitsbergen Sandstone Bedrock · 78°N',
+    type: 'Earth Station',
+    celestialBody: 'earth',
+    latitude: 78.23,
+    longitude: 15.49,
+    elevationKm: 0.13,
+    temperatureMeanC: -5,
+    temperatureMinC: -20,
+    temperatureMaxC: 8,
+    solarIrradianceWm2: 120,
+    solarPotentialScore: 40,
+    waterIcePotential: 'Very High',
+    waterPotentialScore: 100,
+    radiationLevel: 'Low',
+    radiationScore: 99,
+    dustStormRisk: 'Low',
+    dustRiskScore: 99,
+    terrainScore: 88,
+    sourceDataset: 'NordGen, Norwegian Ministry of Agriculture & ESA Sentinel-2',
+    sourceType: 'NASA Landsat / MODIS',
+    description: 'The ultimate crop biodiversity insurance policy located 130 meters deep inside Mount Platåberget in the Norwegian Arctic archipelago. Preserves over 1.2 million global crop seed samples at a steady -18°C within permafrost sandstone, serving as the biological baseline for off-world agricultural germplasm.',
+    advantages: [
+      'Natural arctic permafrost bedrock maintains cryogenic conditions even through power disruptions',
+      'World’s most comprehensive repository of genetic crop diversity for planetary breeding',
+      'Zero tectonic activity and high elevation safely above sea-level rise scenarios'
+    ],
+    challenges: [
+      'Polar night eliminates natural solar irradiance for 4 consecutive months',
+      'Requires dedicated high-power artificial LED cultivation lighting for live crop cycles'
+    ]
+  },
+
+  // ─── 4. The Moon (Luna) Surface Bases & Craters ──────────────────────────────
+  {
+    id: 'shackleton-crater',
+    name: 'Shackleton Crater (Artemis Base Camp)',
+    arabicOrAncientName: 'Lunar South Pole · Peaks of Eternal Light',
+    type: 'Lunar Base',
+    celestialBody: 'moon',
+    latitude: -89.9,
+    longitude: 0.0,
+    elevationKm: -4.2,
+    temperatureMeanC: -50,
+    temperatureMinC: -248,
+    temperatureMaxC: -10,
+    solarIrradianceWm2: 440,
+    solarPotentialScore: 96,
+    waterIcePotential: 'Very High',
+    waterPotentialScore: 98,
+    radiationLevel: 'Extreme',
+    radiationScore: 40,
+    dustStormRisk: 'Low',
+    dustRiskScore: 98,
+    terrainScore: 75,
+    sourceDataset: 'NASA Lunar Reconnaissance Orbiter (LRO) Diviner, LOLA & Mini-RF',
+    sourceType: 'NASA LRO / Apollo PDS',
+    description: 'NASA Artemis primary lunar outpost site on the rim of the 21-km-wide Shackleton Crater at the Lunar South Pole. Elevated rim ridges enjoy near-permanent solar illumination (86-92% of the year), while the deep interior cold traps harbor billions of kilograms of ancient water ice at -248°C (25 Kelvin). Earth looms low on the horizon in a permanent Earthrise alignment.',
+    advantages: [
+      'Near-permanent solar illumination along the crater rim provides continuous solar electricity',
+      'Enormous subsurface water-ice reservoirs in permanently shadowed regions (PSR) for life support and propellant',
+      'Low lunar gravity (0.166g / 1.62 m/s²) enables massive orbital payload launches with minimal propellant'
+    ],
+    challenges: [
+      'Permanently shadowed crater interior is one of the coldest recorded environments in the solar system (-248°C)',
+      'Sharp, abrasive, electrostatic lunar dust (regolith) clings to optical arrays and suit joints'
+    ]
+  },
+  {
+    id: 'tranquility-base',
+    name: 'Tranquility Base (Apollo 11 Outpost)',
+    arabicOrAncientName: 'Mare Tranquillitatis · Statio Tranquillitatis',
+    type: 'Lunar Mare',
+    celestialBody: 'moon',
+    latitude: 0.67,
+    longitude: 23.47,
+    elevationKm: -1.2,
+    temperatureMeanC: -20,
+    temperatureMinC: -173,
+    temperatureMaxC: 117,
+    solarIrradianceWm2: 430,
+    solarPotentialScore: 94,
+    waterIcePotential: 'Low',
+    waterPotentialScore: 35,
+    radiationLevel: 'Extreme',
+    radiationScore: 38,
+    dustStormRisk: 'Low',
+    dustRiskScore: 98,
+    terrainScore: 92,
+    sourceDataset: 'NASA Apollo 11 Surface Journal & LROC Narrow Angle Camera (0.5m/pixel)',
+    sourceType: 'NASA LRO / Apollo PDS',
+    description: 'Historic first human landing site on another celestial body, touched down by Neil Armstrong and Buzz Aldrin on July 20, 1969. Flat, basaltic volcanic plain rich in titanium-bearing ilmenite (FeTiO3) under a stark black sky with the radiant blue-and-white Earth permanently stationed overhead at 60° elevation.',
+    advantages: [
+      'Extremely flat, stable basaltic mare terrain with low boulder density for easy habitat construction',
+      'High concentrations of ilmenite (FeTiO3) provide abundant oxygen extraction via hydrogen reduction',
+      'Earth is prominently suspended high in the sky providing high-gain line-of-sight communications'
+    ],
+    challenges: [
+      '14-day continuous lunar night requires nuclear fission or regenerative fuel cell power storage',
+      'Extreme temperature swings between lunar noon (+117°C) and lunar midnight (-173°C)'
+    ]
   }
 ];

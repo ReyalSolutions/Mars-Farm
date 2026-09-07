@@ -81,12 +81,22 @@ export const MarsSurfaceView: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono text-cyan-400 uppercase tracking-wider truncate">
                 <MapPin className="w-3 h-3 text-mars-400 shrink-0" />
                 <span className="hidden sm:inline">
-                  {surfaceData.terrain3DConfig.isMoon
-                    ? 'Martian Moon Reconnaissance · 3D Vacuum Surface & NASA/ESA Imagery'
-                    : 'Planetary Surface Reconnaissance · 3D Terrain & NASA Imagery'}
+                  {surfaceData.bodyType === 'earth'
+                    ? 'Planet Earth Terrestrial Station · 1.0g Biosphere & NASA Facilities'
+                    : surfaceData.bodyType === 'moon'
+                      ? 'Lunar Surface Reconnaissance · 0.166g Vacuum Regolith & Apollo/Artemis Sites'
+                      : surfaceData.terrain3DConfig.isMoon
+                        ? 'Martian Moon Reconnaissance · 3D Vacuum Surface & NASA/ESA Imagery'
+                        : 'Planetary Surface Reconnaissance · 3D Terrain & NASA Imagery'}
                 </span>
                 <span className="sm:hidden">
-                  {surfaceData.terrain3DConfig.isMoon ? 'Moon Recon · 3D Surface' : 'Surface Recon · 3D Terrain'}
+                  {surfaceData.bodyType === 'earth'
+                    ? 'Earth Station · 1.0g'
+                    : surfaceData.bodyType === 'moon'
+                      ? 'Moon Base · 0.166g'
+                      : surfaceData.terrain3DConfig.isMoon
+                        ? 'Moon Recon · Vacuum'
+                        : 'Surface Recon · 3D Terrain'}
                 </span>
               </div>
               <h1 className="text-sm sm:text-lg font-bold font-display text-white tracking-tight leading-none mt-0.5 truncate">
@@ -109,16 +119,17 @@ export const MarsSurfaceView: React.FC = () => {
           </div>
         </div>
 
-        {/* ── 2. Landing Site Switcher Bar ───────────────────────────────────── */}
+        {/* ── 2. Landing Site Switcher Bar (Mars, Earth, The Moon, Martian Moons) ── */}
         <div
           className="border-t border-slate-800/80 bg-space-900/60 overflow-x-auto no-scrollbar py-1.5 px-3 sm:px-6 lg:px-8 touch-pan-x"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-max">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1 shrink-0">
-              Mars Surface:
+            {/* 1. Mars Surface */}
+            <span className="text-[10px] font-mono text-mars-400 uppercase tracking-wider mr-1 shrink-0 font-bold">
+              Mars:
             </span>
-            {MARS_LOCATIONS.filter((l) => l.type !== 'Martian Moon').map((loc) => {
+            {MARS_LOCATIONS.filter((l) => (l.celestialBody === 'mars' || !l.celestialBody) && l.type !== 'Martian Moon').map((loc) => {
               const isSelected = loc.id === activeId;
               return (
                 <button
@@ -136,10 +147,54 @@ export const MarsSurfaceView: React.FC = () => {
               );
             })}
 
-            <span className="text-[10px] font-mono text-purple-400 uppercase tracking-wider mx-1 shrink-0 flex items-center gap-1">
+            {/* 2. Earth Stations */}
+            <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider mx-1 shrink-0 flex items-center gap-1 font-bold">
+              <span className="text-slate-600">|</span> Earth:
+            </span>
+            {MARS_LOCATIONS.filter((l) => l.celestialBody === 'earth').map((loc) => {
+              const isSelected = loc.id === activeId;
+              return (
+                <button
+                  key={loc.id}
+                  onClick={() => handleSelectLocation(loc.id)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 ${
+                    isSelected
+                      ? 'bg-emerald-950 text-white border border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)] font-bold'
+                      : 'bg-space-950/70 border border-slate-800 text-slate-400 hover:text-emerald-300 hover:border-emerald-500/50'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-emerald-400 animate-ping' : 'bg-slate-600'}`} />
+                  <span>{loc.name.replace(' (NASA / SpaceX)', '').replace(' (HI-SEAS)', '').replace(' (Arctic Norway)', '')}</span>
+                </button>
+              );
+            })}
+
+            {/* 3. The Moon (Luna) */}
+            <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-wider mx-1 shrink-0 flex items-center gap-1 font-bold">
+              <span className="text-slate-600">|</span> Moon:
+            </span>
+            {MARS_LOCATIONS.filter((l) => l.celestialBody === 'moon').map((loc) => {
+              const isSelected = loc.id === activeId;
+              return (
+                <button
+                  key={loc.id}
+                  onClick={() => handleSelectLocation(loc.id)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 ${
+                    isSelected
+                      ? 'bg-indigo-950 text-white border border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)] font-bold'
+                      : 'bg-space-950/70 border border-slate-800 text-slate-400 hover:text-indigo-300 hover:border-indigo-500/50'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-indigo-400 animate-ping' : 'bg-slate-600'}`} />
+                  <span>{loc.name.replace(' (Lunar South Pole)', '').replace(' (Apollo 11)', '')}</span>
+                </button>
+              );
+            })}
+
+            {/* 4. Martian Moons */}
+            <span className="text-[10px] font-mono text-purple-400 uppercase tracking-wider mx-1 shrink-0 flex items-center gap-1 font-bold">
               <span className="text-slate-600">|</span> Moons:
             </span>
-
             {MARS_LOCATIONS.filter((l) => l.type === 'Martian Moon').map((loc) => {
               const isSelected = loc.id === activeId;
               return (

@@ -435,6 +435,134 @@ const createSiteRealisticTerrainTextures = (surfaceData: MarsSurfaceDetail) => {
     }
     rCtx.fillStyle = 'rgba(215, 215, 215, 0.85)';
     rCtx.fillRect(0, 0, size, size);
+  } else if (locId === 'kennedy-space-center') {
+    // ── Kennedy Space Center: Merritt Island Coastal Turf, Crawlerway & Launch Apron ──
+    ctx.fillStyle = 'rgba(46, 125, 50, 0.45)';
+    for (let g = 0; g < 40; g++) {
+      const gx = Math.random() * size;
+      const gy = Math.random() * size;
+      ctx.beginPath();
+      ctx.ellipse(gx, gy, 45, 25, Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Concrete launch apron and tarmac
+    ctx.fillStyle = 'rgba(170, 175, 180, 0.75)';
+    bCtx.fillStyle = 'rgb(160, 160, 160)';
+    rCtx.fillStyle = 'rgb(120, 120, 120)';
+    ctx.fillRect(size * 0.2, size * 0.35, size * 0.6, size * 0.3);
+    bCtx.fillRect(size * 0.2, size * 0.35, size * 0.6, size * 0.3);
+    rCtx.fillRect(size * 0.2, size * 0.35, size * 0.6, size * 0.3);
+
+    // High-visibility yellow safety boundary stripes
+    ctx.strokeStyle = 'rgba(234, 179, 8, 0.85)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(size * 0.25, size * 0.4);
+    ctx.lineTo(size * 0.75, size * 0.4);
+    ctx.moveTo(size * 0.25, size * 0.6);
+    ctx.lineTo(size * 0.75, size * 0.6);
+    ctx.stroke();
+  } else if (locId === 'mauna-kea') {
+    // ── Mauna Kea: High-Altitude Basaltic Cinder Cones & Volcanic Scoria ──
+    ctx.fillStyle = 'rgba(35, 25, 22, 0.7)';
+    for (let v = 0; v < 35; v++) {
+      const vx = Math.random() * size;
+      const vy = Math.random() * size;
+      ctx.beginPath();
+      ctx.arc(vx, vy, 20 + Math.random() * 40, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Reddish-brown oxidized tephra patches
+    ctx.fillStyle = 'rgba(120, 50, 35, 0.5)';
+    for (let t = 0; t < 25; t++) {
+      const tx = Math.random() * size;
+      const ty = Math.random() * size;
+      ctx.beginPath();
+      ctx.ellipse(tx, ty, 35, 18, Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (locId === 'svalbard-vault') {
+    // ── Svalbard Global Seed Vault: Arctic Permafrost, Crystalline Snowdrifts & Blue Ice ──
+    ctx.fillStyle = 'rgba(235, 245, 255, 0.85)';
+    bCtx.fillStyle = 'rgb(210, 210, 210)';
+    rCtx.fillStyle = 'rgb(60, 60, 60)'; // Glossy specular ice
+    for (let s = 0; s < 30; s++) {
+      const sx = Math.random() * size;
+      const sy = Math.random() * size;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy, 55, 30, Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Permafrost ice wedge fissures
+    ctx.strokeStyle = 'rgba(186, 230, 253, 0.75)';
+    bCtx.strokeStyle = 'rgb(140, 140, 140)';
+    ctx.lineWidth = 3;
+    bCtx.lineWidth = 3;
+    for (let f = 0; f < 18; f++) {
+      const fx = Math.random() * size;
+      const fy = Math.random() * size;
+      ctx.beginPath();
+      bCtx.beginPath();
+      ctx.moveTo(fx, fy);
+      bCtx.moveTo(fx, fy);
+      ctx.lineTo(fx + (Math.random() - 0.5) * 80, fy + (Math.random() - 0.5) * 80);
+      bCtx.lineTo(fx + (Math.random() - 0.5) * 80, fy + (Math.random() - 0.5) * 80);
+      ctx.stroke();
+      bCtx.stroke();
+    }
+  } else if (locId === 'shackleton-crater') {
+    // ── Shackleton Crater: Lunar South Pole Highlands Anorthosite Regolith & Brilliant Ejecta ──
+    ctx.fillStyle = 'rgba(195, 205, 215, 0.45)';
+    for (let e = 0; e < 32; e++) {
+      const ex = Math.random() * size;
+      const ey = Math.random() * size;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 50, 28, Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Radial bright ejecta ray streaks
+    ctx.strokeStyle = 'rgba(240, 245, 255, 0.65)';
+    bCtx.strokeStyle = 'rgb(190, 190, 190)';
+    ctx.lineWidth = 2.5;
+    bCtx.lineWidth = 2.5;
+    for (let r = 0; r < 24; r++) {
+      const rx = (r * 42 + 20) % size;
+      ctx.beginPath();
+      bCtx.beginPath();
+      ctx.moveTo(rx, 0);
+      bCtx.moveTo(rx, 0);
+      ctx.lineTo(rx + (Math.random() - 0.5) * 50, size);
+      bCtx.lineTo(rx + (Math.random() - 0.5) * 50, size);
+      ctx.stroke();
+      bCtx.stroke();
+    }
+  } else if (locId === 'tranquility-base') {
+    // ── Mare Tranquillitatis: Apollo 11 Lunar Basalt Regolith & Historic Bootprints ──
+    ctx.fillStyle = 'rgba(55, 55, 58, 0.55)';
+    for (let m = 0; m < 35; m++) {
+      const mx = Math.random() * size;
+      const my = Math.random() * size;
+      ctx.beginPath();
+      ctx.arc(mx, my, 25 + Math.random() * 45, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Apollo 11 Astronaut footpaths & equipment trail
+    ctx.strokeStyle = 'rgba(40, 40, 42, 0.85)';
+    bCtx.strokeStyle = 'rgb(45, 45, 45)';
+    rCtx.strokeStyle = 'rgb(240, 240, 240)';
+    ctx.lineWidth = 3.5;
+    bCtx.lineWidth = 3.5;
+    for (let t = 0; t < 12; t++) {
+      const tx = 180 + t * 45;
+      ctx.beginPath();
+      bCtx.beginPath();
+      ctx.moveTo(tx, 200);
+      bCtx.moveTo(tx, 200);
+      ctx.lineTo(tx + 25, 420);
+      bCtx.lineTo(tx + 25, 420);
+      ctx.stroke();
+      bCtx.stroke();
+    }
   }
 
   // Create Three.js Textures
@@ -482,10 +610,17 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   const isDescendingRef = useRef<boolean>(isDescending);
   const descentStartTimeRef = useRef<number>(performance.now());
 
+  const getTargetCelestialBody = (): 'earth' | 'moon' | 'martian-moon' | 'mars' => {
+    if (surfaceData.bodyType === 'earth' || surfaceData.celestialBody === 'earth') return 'earth';
+    if (surfaceData.bodyType === 'moon' || surfaceData.celestialBody === 'moon') return 'moon';
+    if (surfaceData.terrain3DConfig.isMoon) return 'martian-moon';
+    return 'mars';
+  };
+
   // Surface soundscape and EDL descent audio orchestration
   useEffect(() => {
     if (isDescendingRef.current) {
-      marsAudioService.startDescentAudio(surfaceData.terrain3DConfig.isMoon);
+      marsAudioService.startDescentAudio(getTargetCelestialBody());
     } else {
       marsAudioService.startSurfaceAudio(surfaceData.locationId, isDustStormActive);
     }
@@ -501,7 +636,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     setIsAudioMuted(next);
     if (!next) {
       if (isDescendingRef.current) {
-        marsAudioService.startDescentAudio(surfaceData.terrain3DConfig.isMoon);
+        marsAudioService.startDescentAudio(getTargetCelestialBody());
       } else {
         marsAudioService.startSurfaceAudio(surfaceData.locationId, isDustStormActive);
       }
@@ -523,6 +658,9 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     commsGroup?: THREE.Group;
     phobosMesh?: THREE.Mesh;
     marsPlanetMesh?: THREE.Mesh;
+    earthPlanetMesh?: THREE.Mesh;
+    oceanMesh?: THREE.Mesh;
+    cloudGroup?: THREE.Group;
     centrifugeRing?: THREE.Group;
     starsPoints?: THREE.Points;
     camera?: THREE.PerspectiveCamera;
@@ -547,14 +685,110 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
   }, [cameraMode]);
 
   const updateLightingAndAtmosphere = () => {
-    const { sunLight, ambientLight, fog, skyMesh, domeLights, phobosMesh, marsPlanetMesh, starsPoints } = sceneElementsRef.current;
+    const {
+      sunLight,
+      ambientLight,
+      fog,
+      skyMesh,
+      domeLights,
+      phobosMesh,
+      marsPlanetMesh,
+      earthPlanetMesh,
+      starsPoints,
+    } = sceneElementsRef.current;
     if (!sunLight || !ambientLight || !fog || !skyMesh) return;
 
     const isStorm = isDustStormRef.current;
     const currentSolTime = timeOfSolRef.current;
-    const isMoon = surfaceData.terrain3DConfig.isMoon;
+    const isEarth = surfaceData.bodyType === 'earth' || surfaceData.celestialBody === 'earth';
+    const isEarthMoon = surfaceData.bodyType === 'moon' || surfaceData.celestialBody === 'moon';
+    const isMartianMoon = surfaceData.terrain3DConfig.isMoon && !isEarthMoon;
 
-    if (isMoon) {
+    if (isEarthMoon) {
+      // ── The Moon (Luna - Apollo / Artemis) Space Vacuum Environment ──
+      fog.density = 0.0001; // Zero atmospheric scattering on lunar surface
+      fog.color.setHex(0x000002);
+      (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(0x000002);
+      if (starsPoints) starsPoints.visible = true; // Stars always visible in vacuum daylight
+      if (earthPlanetMesh) earthPlanetMesh.visible = true;
+      if (marsPlanetMesh) marsPlanetMesh.visible = false;
+      if (phobosMesh) phobosMesh.visible = false;
+
+      if (currentSolTime === 'day') {
+        sunLight.position.set(60, 60, 40);
+        sunLight.color.setHex(isStorm ? 0xfffae0 : 0xffffff);
+        sunLight.intensity = isStorm ? 1.8 : 2.8; // Harsh unfiltered solar flux
+        ambientLight.color.setHex(0x38bdf8); // Bright blue Earth-shine reflection
+        ambientLight.intensity = 0.45;
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 1.0));
+      } else if (currentSolTime === 'sunset') {
+        // Lunar Terminator: low-angle raking sunlight, long black shadows
+        sunLight.position.set(90, 2, -20);
+        sunLight.color.setHex(0xffeedd);
+        sunLight.intensity = 1.6;
+        ambientLight.color.setHex(0x2563eb);
+        ambientLight.intensity = 0.4;
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 2.4));
+      } else {
+        // Lunar Night: Sun below horizon, landscape illuminated by radiant Earth-shine!
+        sunLight.position.set(-50, -40, 20);
+        sunLight.intensity = 0.0;
+        ambientLight.color.setHex(0x60a5fa); // Radiant Earth-shine
+        ambientLight.intensity = 0.65;
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 4.8));
+      }
+      return;
+    }
+
+    if (isEarth) {
+      // ── Planet Earth: Dense N2-O2 Rayleigh Sky & Cloud Formations ──
+      if (marsPlanetMesh) marsPlanetMesh.visible = false;
+      if (phobosMesh) phobosMesh.visible = false;
+      if (earthPlanetMesh) earthPlanetMesh.visible = false;
+      if (starsPoints) starsPoints.visible = currentSolTime === 'night';
+
+      if (currentSolTime === 'day') {
+        sunLight.position.set(40, 75, 30);
+        sunLight.color.setHex(isStorm ? 0xd0d5dd : 0xfffdf0);
+        sunLight.intensity = isStorm ? 0.65 : 2.4;
+        ambientLight.color.setHex(isStorm ? 0x64748b : 0xbae6fd);
+        ambientLight.intensity = isStorm ? 0.75 : 0.95;
+
+        fog.color.setHex(isStorm ? 0x475569 : 0xbfdbfe);
+        fog.density = isStorm ? 0.007 : 0.0016;
+
+        (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(
+          isStorm ? 0x334155 : 0x38bdf8 // Crisp blue sky vs stormy overcast
+        );
+        if (domeLights) domeLights.forEach((l) => (l.intensity = isStorm ? 2.5 : 0.8));
+      } else if (currentSolTime === 'sunset') {
+        // Golden hour sunset
+        sunLight.position.set(85, 6, -15);
+        sunLight.color.setHex(0xf97316);
+        sunLight.intensity = isStorm ? 0.35 : 2.0;
+        ambientLight.color.setHex(0x9a3412);
+        ambientLight.intensity = 0.6;
+
+        fog.color.setHex(0x7c2d12);
+        fog.density = 0.003;
+        (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(0xca8a04);
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 2.8));
+      } else {
+        // Night side
+        sunLight.position.set(-30, -30, 20);
+        sunLight.intensity = 0.0;
+        ambientLight.color.setHex(0x1e293b);
+        ambientLight.intensity = 0.4;
+
+        fog.color.setHex(0x020617);
+        fog.density = 0.002;
+        (skyMesh.material as THREE.MeshBasicMaterial).color.setHex(0x020617);
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 4.2));
+      }
+      return;
+    }
+
+    if (isMartianMoon) {
       // ── Martian Moon (Phobos / Deimos) Vacuum of Space Environment ──
       fog.density = 0.0001; // Zero atmospheric scattering
       fog.color.setHex(0x010103);
@@ -564,6 +798,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       if (starsPoints) starsPoints.visible = true;
       if (marsPlanetMesh) marsPlanetMesh.visible = true;
       if (phobosMesh) phobosMesh.visible = false;
+      if (earthPlanetMesh) earthPlanetMesh.visible = false;
 
       if (currentSolTime === 'day') {
         sunLight.position.set(50, 70, 40);
@@ -571,21 +806,21 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         sunLight.intensity = isStorm ? 1.6 : 2.8; // Unfiltered direct cosmic sunlight
         ambientLight.color.setHex(0x943b22); // Mars-shine planet reflection
         ambientLight.intensity = 0.55;
-        if (domeLights) domeLights.forEach(l => (l.intensity = 1.0));
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 1.0));
       } else if (currentSolTime === 'sunset') {
         sunLight.position.set(80, 2, -30);
         sunLight.color.setHex(0xffeedd);
         sunLight.intensity = 1.4;
         ambientLight.color.setHex(0x6e2c18);
         ambientLight.intensity = 0.45;
-        if (domeLights) domeLights.forEach(l => (l.intensity = 2.4));
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 2.4));
       } else {
         // Night side: Sun blocked, Mars illuminates the lunar regolith in radiant crimson
         sunLight.position.set(-40, -40, 20);
         sunLight.intensity = 0.0;
         ambientLight.color.setHex(0xa03c20); // Mars-shine
         ambientLight.intensity = 0.45;
-        if (domeLights) domeLights.forEach(l => (l.intensity = 4.8));
+        if (domeLights) domeLights.forEach((l) => (l.intensity = 4.8));
       }
       return;
     }
@@ -737,12 +972,17 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const ambientLight = new THREE.AmbientLight(0xab5838, 0.85);
     scene.add(ambientLight);
 
-    // ── 4. Celestial Objects: Sun Disk & Phobos Moon / Giant Mars Planet ──────
-    const isMoon = surfaceData.terrain3DConfig.isMoon;
+    // ── 4. Celestial Objects: Sun Disk & Phobos / Earthrise / Giant Mars Planet ──
+    const isEarth = surfaceData.bodyType === 'earth' || surfaceData.celestialBody === 'earth';
+    const isEarthMoon = surfaceData.bodyType === 'moon' || surfaceData.celestialBody === 'moon';
+    const isMartianMoon = surfaceData.terrain3DConfig.isMoon && !isEarthMoon;
     const isPhobos = surfaceData.terrain3DConfig.moonType === 'phobos';
 
     const sunDiskMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const sunDisk = new THREE.Mesh(new THREE.SphereGeometry(isMoon ? 3.6 : 4.5, 16, 16), sunDiskMat);
+    const sunDisk = new THREE.Mesh(
+      new THREE.SphereGeometry(isEarthMoon ? 4.8 : isMartianMoon ? 3.6 : isEarth ? 5.2 : 4.5, 16, 16),
+      sunDiskMat
+    );
     sunDisk.position.set(120, 180, 90);
     scene.add(sunDisk);
 
@@ -759,12 +999,12 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     phobosGeo.computeVertexNormals();
     const phobosMesh = new THREE.Mesh(phobosGeo, phobosMat);
     phobosMesh.position.set(-140, 90, -80);
-    phobosMesh.visible = !isMoon;
+    phobosMesh.visible = !isEarth && !isEarthMoon && !isMartianMoon;
     scene.add(phobosMesh);
 
     // ── GIANT MARS PLANET IN THE SKY (Dominates sky when standing on Phobos or Deimos) ──
     let marsPlanetMesh: THREE.Mesh | undefined;
-    if (isMoon) {
+    if (isMartianMoon) {
       const marsRadius = isPhobos ? 44 : 22; // On Phobos, Mars fills a massive 42° across the sky!
       const marsGeo = new THREE.SphereGeometry(marsRadius, 36, 36);
       const marsMat = new THREE.MeshStandardMaterial({
@@ -785,7 +1025,6 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         },
         undefined,
         () => {
-          // Procedural fallback texture for Mars globe
           const mgCanvas = document.createElement('canvas');
           mgCanvas.width = 512;
           mgCanvas.height = 256;
@@ -805,12 +1044,10 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       );
 
       marsPlanetMesh = new THREE.Mesh(marsGeo, marsMat);
-      // Position high in the sky directly facing the landing outpost
       marsPlanetMesh.position.set(isPhobos ? -80 : -70, isPhobos ? 65 : 75, isPhobos ? -115 : -135);
-      marsPlanetMesh.rotation.z = 0.44; // 25.2° axial tilt
+      marsPlanetMesh.rotation.z = 0.44;
       scene.add(marsPlanetMesh);
 
-      // Delicate blue atmospheric limb glow ring
       const limbGeo = new THREE.RingGeometry(marsRadius * 0.995, marsRadius * 1.05, 48);
       const limbMat = new THREE.MeshBasicMaterial({
         color: 0x55aaff,
@@ -824,8 +1061,110 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       scene.add(limbMesh);
     }
 
+    // ── RADIANT LOOMING EARTHRISE IN THE MOON'S SKY (Apollo 8 / Artemis view) ──
+    let earthPlanetMesh: THREE.Mesh | undefined;
+    if (isEarthMoon) {
+      const earthRadius = 15; // Earth appears ~4x larger in lunar sky than Moon appears from Earth!
+      const earthGeo = new THREE.SphereGeometry(earthRadius, 36, 36);
+      const earthMat = new THREE.MeshStandardMaterial({
+        roughness: 0.72,
+        metalness: 0.08,
+        color: 0x38bdf8,
+      });
+
+      const earthTexLoader = new THREE.TextureLoader();
+      earthTexLoader.setCrossOrigin('anonymous');
+      earthTexLoader.load(
+        '/textures/earth_realistic.jpg',
+        (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          earthMat.map = tex;
+          earthMat.color.setHex(0xffffff);
+          earthMat.needsUpdate = true;
+        },
+        undefined,
+        () => {
+          const egCanvas = document.createElement('canvas');
+          egCanvas.width = 512;
+          egCanvas.height = 256;
+          const egCtx = egCanvas.getContext('2d')!;
+          egCtx.fillStyle = '#0a2540';
+          egCtx.fillRect(0, 0, 512, 256);
+          egCtx.fillStyle = '#1e3a8a';
+          egCtx.beginPath();
+          egCtx.ellipse(256, 128, 180, 90, 0, 0, Math.PI * 2);
+          egCtx.fill();
+          egCtx.fillStyle = '#22c55e';
+          egCtx.beginPath();
+          egCtx.ellipse(180, 100, 60, 45, 0.4, 0, Math.PI * 2);
+          egCtx.fill();
+          egCtx.fillStyle = '#ffffff';
+          egCtx.beginPath();
+          egCtx.arc(300, 90, 40, 0, Math.PI * 2);
+          egCtx.fill();
+          const egTex = new THREE.CanvasTexture(egCanvas);
+          earthMat.map = egTex;
+          earthMat.needsUpdate = true;
+        }
+      );
+
+      earthPlanetMesh = new THREE.Mesh(earthGeo, earthMat);
+      // Position high in lunar sky in a dramatic Earthrise angle
+      earthPlanetMesh.position.set(-85, 68, -125);
+      earthPlanetMesh.rotation.z = 0.41; // 23.4° axial tilt
+      scene.add(earthPlanetMesh);
+
+      // Luminous blue atmospheric limb glow ring
+      const limbGeo = new THREE.RingGeometry(earthRadius * 0.995, earthRadius * 1.08, 48);
+      const limbMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.65,
+        side: THREE.DoubleSide,
+      });
+      const limbMesh = new THREE.Mesh(limbGeo, limbMat);
+      limbMesh.position.copy(earthPlanetMesh.position);
+      limbMesh.lookAt(0, 0, 0);
+      scene.add(limbMesh);
+    }
+
+    // ── EARTH ATLANTIC OCEAN HORIZON & CLOUDS (For Earth Stations) ──
+    let oceanMesh: THREE.Mesh | undefined;
+    if (isEarth && surfaceData.hasOcean) {
+      const oceanGeo = new THREE.PlaneGeometry(140, 260);
+      oceanGeo.rotateX(-Math.PI / 2);
+      const oceanMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        roughness: 0.12,
+        metalness: 0.85,
+        transparent: true,
+        opacity: 0.9,
+      });
+      oceanMesh = new THREE.Mesh(oceanGeo, oceanMat);
+      oceanMesh.position.set(65, -0.25, 0);
+      scene.add(oceanMesh);
+    }
+
+    let cloudGroup: THREE.Group | undefined;
+    if (isEarth || surfaceData.hasClouds) {
+      cloudGroup = new THREE.Group();
+      const cloudMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 1.0,
+        transparent: true,
+        opacity: 0.72,
+      });
+      for (let c = 0; c < 8; c++) {
+        const puff = new THREE.Mesh(new THREE.DodecahedronGeometry(8 + Math.random() * 6, 1), cloudMat);
+        puff.position.set((Math.random() - 0.5) * 140, 52 + Math.random() * 20, (Math.random() - 0.5) * 140);
+        puff.scale.set(2.4, 0.45, 1.2);
+        cloudGroup.add(puff);
+      }
+      scene.add(cloudGroup);
+    }
+
     // Starfield for deep space / night view
-    const starCount = isMoon ? 2000 : 1200;
+    const starCount = isEarthMoon ? 3500 : isMartianMoon ? 2000 : 1200;
     const starGeo = new THREE.BufferGeometry();
     const starPositions = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
@@ -839,14 +1178,14 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
     const starMat = new THREE.PointsMaterial({
       color: 0xffffff,
-      size: isMoon ? 1.4 : 1.2,
+      size: isEarthMoon ? 1.6 : isMartianMoon ? 1.4 : 1.2,
       transparent: true,
-      opacity: isMoon ? 0.95 : 0.8,
+      opacity: isEarthMoon ? 0.98 : isMartianMoon ? 0.95 : 0.8,
     });
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 
-    // ── 5. Photorealistic Procedural Martian Terrain with Sand Ripples ─────────
+    // ── 5. Photorealistic Procedural Terrain with Sand Ripples & Craters ───────
     const terrainSize = 150;
     const terrainSegments = 140;
     const terrainGeo = new THREE.PlaneGeometry(terrainSize, terrainSize, terrainSegments, terrainSegments);
@@ -856,6 +1195,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     const rimScale = surfaceData.terrain3DConfig.craterRimScale || 1.0;
     const isCanyon = surfaceData.terrain3DConfig.hasCanyonWalls;
     const isLavaTubes = surfaceData.terrain3DConfig.hasLavaTubes;
+    const locId = surfaceData.locationId;
 
     for (let i = 0; i < positions.count; i++) {
       const x = positions.getX(i);
@@ -864,15 +1204,63 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
 
       let elevation = 0;
 
-      if (isMoon) {
+      if (isEarthMoon) {
+        // ── Lunar Surface: Micro-cratering, Anorthosite Rim & Mare Basalt ──
+        if (locId === 'shackleton-crater') {
+          // Deep polar crater bowl with elevated rim
+          elevation =
+            Math.sin(x * 0.08) * Math.cos(z * 0.08) * 1.2 +
+            Math.sin(x * 0.2) * Math.sin(z * 0.2) * 0.4;
+          if (distFromCenter < 14) {
+            elevation *= Math.max(0, (distFromCenter - 4) / 10) * 0.15;
+          } else if (distFromCenter > 20) {
+            // Towering rim of Shackleton Peak
+            elevation += Math.pow((distFromCenter - 20) * 0.14, 1.6) * 1.8;
+          }
+        } else {
+          // Tranquility Base: Flat mare basalt with gentle crater pits
+          elevation =
+            Math.sin(x * 0.05) * Math.cos(z * 0.05) * 0.8 +
+            Math.sin(x * 0.15 + 0.8) * Math.cos(z * 0.12) * 0.35;
+          if (distFromCenter < 14) {
+            elevation *= Math.max(0, (distFromCenter - 4) / 10) * 0.12;
+          } else if (distFromCenter > 28) {
+            elevation += Math.pow((distFromCenter - 28) * 0.07, 1.3) * 0.7;
+          }
+        }
+      } else if (isEarth) {
+        // ── Earth Terrain: Flat Coastal / Mountain Volcano / Arctic Plateau ──
+        if (locId === 'kennedy-space-center') {
+          // Flat coastal Florida plain with dunes and ocean depression at east edge
+          elevation = Math.sin(x * 0.03) * Math.cos(z * 0.03) * 0.4;
+          if (x > 32) {
+            elevation = -0.35; // Ocean water boundary
+          } else if (distFromCenter < 16) {
+            elevation = 0.05; // Concrete launch pad apron
+          }
+        } else if (locId === 'mauna-kea') {
+          // High-altitude volcanic cinder cone mountain slope
+          elevation = (x * 0.14) + (Math.sin(z * 0.08) * 1.8) + (Math.cos(x * 0.12) * 0.9);
+          if (distFromCenter < 14) {
+            elevation *= Math.max(0, (distFromCenter - 4) / 10) * 0.2;
+          }
+        } else {
+          // Svalbard: Sandstone plateau with steep mountain cliff face
+          elevation = Math.sin(x * 0.06) * Math.cos(z * 0.06) * 0.7;
+          if (z < -22) {
+            elevation += Math.pow(Math.abs(z + 22) * 0.25, 1.7) * 0.8;
+          }
+          if (distFromCenter < 14) {
+            elevation *= Math.max(0, (distFromCenter - 4) / 10) * 0.15;
+          }
+        }
+      } else if (isMartianMoon) {
         if (isPhobos) {
-          // Phobos: rough microgravity asteroid surface, cratered terrain + Stickney crater wall + parallel grooves
           elevation =
             Math.sin(x * 0.05) * Math.cos(z * 0.05) * 1.8 +
             Math.sin(x * 0.14) * Math.cos(z * 0.12) * 0.8 +
             Math.sin(x * 0.3) * Math.sin(z * 0.3) * 0.3;
 
-          // Parallel stress fracture grooves
           const grooveVal = Math.sin(x * 0.45 + z * 0.15);
           if (Math.abs(grooveVal) < 0.28) {
             elevation -= (0.28 - Math.abs(grooveVal)) * 2.2;
@@ -881,10 +1269,9 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
           if (distFromCenter < 14) {
             elevation *= Math.max(0, (distFromCenter - 4) / 10) * 0.15;
           } else if (distFromCenter > 22) {
-            elevation += Math.pow((distFromCenter - 22) * 0.13, 1.6) * 1.5; // Stickney Rim
+            elevation += Math.pow((distFromCenter - 22) * 0.13, 1.6) * 1.5;
           }
         } else {
-          // Deimos: Smooth, rounded undulating mounds enveloped in powdered regolith
           elevation =
             Math.sin(x * 0.05) * Math.cos(z * 0.05) * 1.4 +
             Math.cos(x * 0.1) * Math.sin(z * 0.08) * 0.6;
@@ -1314,7 +1701,7 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
 
     // ── 7B. Microgravity Centrifuge Hydroponics Module (For Moon Outpost) ──────
     let centrifugeRing: THREE.Group | undefined;
-    if (isMoon) {
+    if (isMartianMoon) {
       centrifugeRing = new THREE.Group();
       centrifugeRing.position.set(0, 7.2, 0);
 
@@ -1647,6 +2034,9 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       commsGroup,
       phobosMesh,
       marsPlanetMesh,
+      earthPlanetMesh,
+      oceanMesh,
+      cloudGroup,
       centrifugeRing,
       starsPoints: stars,
       camera,
@@ -1668,6 +2058,19 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       // Slowly rotate giant Mars planet in moon's sky
       if (marsPlanetMesh) {
         marsPlanetMesh.rotation.y += delta * 0.014;
+      }
+
+      // Slowly rotate Earth globe in lunar sky (Earthrise view)
+      if (earthPlanetMesh) {
+        earthPlanetMesh.rotation.y += delta * 0.016;
+      }
+
+      // Slowly drift cumulus clouds across Earth sky
+      if (cloudGroup) {
+        cloudGroup.children.forEach((cloud, cIdx) => {
+          cloud.position.x += delta * (0.8 + cIdx * 0.12);
+          if (cloud.position.x > 75) cloud.position.x = -75;
+        });
       }
 
       // Slowly rotate microgravity plant centrifuge
@@ -1697,21 +2100,30 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
           strobe2.intensity = strobeIntensity;
         }
 
-        // A. Atmospheric billows
+        // A. Atmospheric billows / Earth rainfall
         if (dustParticles) {
           const posAttr = dustParticles.geometry.attributes.position as THREE.BufferAttribute;
           for (let i = 0; i < dustCount; i++) {
-            let x = posAttr.getX(i) + dustVel[i].x;
-            let y = posAttr.getY(i) + dustVel[i].y + Math.sin(x * 0.2 + elapsed * 2) * 0.04;
-            let z = posAttr.getZ(i) + dustVel[i].z;
+            if (isEarth) {
+              let x = posAttr.getX(i) - 0.08;
+              let y = posAttr.getY(i) - 0.85; // Rapid downward rainfall
+              let z = posAttr.getZ(i);
+              if (y < 0.2) y = 32;
+              if (x < -55) x = 55;
+              posAttr.setXYZ(i, x, y, z);
+            } else {
+              let x = posAttr.getX(i) + dustVel[i].x;
+              let y = posAttr.getY(i) + dustVel[i].y + Math.sin(x * 0.2 + elapsed * 2) * 0.04;
+              let z = posAttr.getZ(i) + dustVel[i].z;
 
-            if (x < -55) x = 55;
-            if (y < 0.3) y = 28;
-            if (y > 32) y = 0.5;
-            if (z < -55) z = 55;
-            if (z > 55) z = -55;
+              if (x < -55) x = 55;
+              if (y < 0.3) y = 28;
+              if (y > 32) y = 0.5;
+              if (z < -55) z = 55;
+              if (z > 55) z = -55;
 
-            posAttr.setXYZ(i, x, y, z);
+              posAttr.setXYZ(i, x, y, z);
+            }
           }
           posAttr.needsUpdate = true;
         }
@@ -1895,10 +2307,26 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
                 ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]'
                 : 'text-slate-400 hover:text-white'
             }`}
-            title={surfaceData.terrain3DConfig.isMoon ? 'Solar Noon · 178 W/m² (Direct space radiation)' : 'Martian Midday (Sol 12:00) · 175 W/m²'}
+            title={
+              surfaceData.bodyType === 'earth'
+                ? 'Daytime · Crisp sunlight, oceanic breeze'
+                : surfaceData.bodyType === 'moon'
+                  ? 'Solar Noon · 1361 W/m² (Direct space solar radiation)'
+                  : surfaceData.terrain3DConfig.isMoon
+                    ? 'Solar Noon · Space vacuum radiation'
+                    : 'Martian Midday (Sol 12:00) · 175 W/m²'
+            }
           >
             <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">{surfaceData.terrain3DConfig.isMoon ? 'Solar Noon' : 'Midday'}</span>
+            <span className="hidden sm:inline">
+              {surfaceData.bodyType === 'earth'
+                ? 'Day'
+                : surfaceData.bodyType === 'moon'
+                  ? 'Solar Noon'
+                  : surfaceData.terrain3DConfig.isMoon
+                    ? 'Solar Noon'
+                    : 'Midday'}
+            </span>
           </button>
           <button
             onClick={() => setTimeOfSol('sunset')}
@@ -1907,10 +2335,26 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
                 ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
                 : 'text-slate-400 hover:text-white'
             }`}
-            title={surfaceData.terrain3DConfig.isMoon ? 'Lunar Terminator · Long raking shadows' : 'Martian Blue Sunset (Sol 18:30) · Authentic NASA blue halo'}
+            title={
+              surfaceData.bodyType === 'earth'
+                ? 'Golden Hour · Warm dusk illumination'
+                : surfaceData.bodyType === 'moon'
+                  ? 'Lunar Terminator · Raking low-angle shadows'
+                  : surfaceData.terrain3DConfig.isMoon
+                    ? 'Terminator · Low raking angle'
+                    : 'Martian Blue Sunset (Sol 18:30) · NASA blue halo'
+            }
           >
             <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
-            <span className="hidden sm:inline">{surfaceData.terrain3DConfig.isMoon ? 'Terminator' : 'Sunset'}</span>
+            <span className="hidden sm:inline">
+              {surfaceData.bodyType === 'earth'
+                ? 'Golden Hour'
+                : surfaceData.bodyType === 'moon'
+                  ? 'Terminator'
+                  : surfaceData.terrain3DConfig.isMoon
+                    ? 'Terminator'
+                    : 'Sunset'}
+            </span>
           </button>
           <button
             onClick={() => setTimeOfSol('night')}
@@ -1919,14 +2363,24 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
                 ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]'
                 : 'text-slate-400 hover:text-white'
             }`}
-            title={surfaceData.terrain3DConfig.isMoon ? 'Cosmic Night · Illuminated by radiant Mars-shine' : 'Frigid Martian Night (Sol 23:00) · -88°C, Phobos rising'}
+            title={
+              surfaceData.bodyType === 'earth'
+                ? 'Night · Starry sky and facility illumination'
+                : surfaceData.bodyType === 'moon'
+                  ? 'Lunar Night · Illuminated by radiant blue Earth-shine!'
+                  : surfaceData.terrain3DConfig.isMoon
+                    ? 'Cosmic Night · Radiant Mars-shine'
+                    : 'Frigid Martian Night (Sol 23:00) · -88°C, Phobos rising'
+            }
           >
             <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">{surfaceData.terrain3DConfig.isMoon ? 'Cosmic Night' : 'Night'}</span>
+            <span className="hidden sm:inline">
+              {surfaceData.bodyType === 'moon' ? 'Earth-Shine' : 'Night'}
+            </span>
           </button>
         </div>
 
-        {/* Dust Storm / Solar Storm Simulation Toggle */}
+        {/* Storm / Precipitation / Solar Storm Simulation Toggle */}
         <button
           onClick={() => setIsDustStormActive(!isDustStormActive)}
           className={`flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-mono backdrop-blur-md border transition-all ${
@@ -1934,21 +2388,41 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
               ? 'bg-red-950/80 border-red-500 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.35)] animate-pulse'
               : 'bg-space-950/85 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
           }`}
-          title={surfaceData.terrain3DConfig.isMoon ? 'Simulate Solar Energetic Particle (SEP) / Solar Storm radiation alert' : 'Simulate active Martian global dust squall (Optical Depth Tau > 3.0)'}
+          title={
+            surfaceData.bodyType === 'earth'
+              ? 'Simulate coastal squall and precipitation rainfall'
+              : surfaceData.bodyType === 'moon' || surfaceData.terrain3DConfig.isMoon
+                ? 'Simulate Solar Energetic Particle (SEP) storm alert'
+                : 'Simulate active Martian global dust squall (Optical Depth Tau > 3.0)'
+          }
         >
           <div className="flex items-center gap-1.5 sm:gap-2">
             <Wind className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isDustStormActive ? 'text-red-400 animate-spin' : 'text-slate-400'}`} />
-            <span className="hidden xs:inline">{surfaceData.terrain3DConfig.isMoon ? 'Solar Storm' : 'Dust Storm'}</span>
+            <span className="hidden xs:inline">
+              {surfaceData.bodyType === 'earth'
+                ? 'Rain Squall'
+                : surfaceData.bodyType === 'moon' || surfaceData.terrain3DConfig.isMoon
+                  ? 'Solar Storm'
+                  : 'Dust Storm'}
+            </span>
             <span className="xs:hidden">Storm</span>
           </div>
           <span className="text-[9px] sm:text-[10px] ml-1 sm:ml-2 px-1.5 py-0.5 rounded bg-black/50 font-bold">
-            {surfaceData.terrain3DConfig.isMoon
-              ? (isDustStormActive ? 'SEP ALERT' : 'SEP CLEAR')
-              : (isDustStormActive ? 'TAU 3.2' : 'CLEAR')}
+            {surfaceData.bodyType === 'earth'
+              ? isDustStormActive
+                ? 'RAIN'
+                : 'CLEAR'
+              : surfaceData.bodyType === 'moon' || surfaceData.terrain3DConfig.isMoon
+                ? isDustStormActive
+                  ? 'SEP ALERT'
+                  : 'SEP CLEAR'
+                : isDustStormActive
+                  ? 'TAU 3.2'
+                  : 'CLEAR'}
           </span>
         </button>
 
-        {/* Realistic Martian Soundscape & Music Toggle */}
+        {/* Realistic Acoustic Soundscape & Music Toggle */}
         <button
           onClick={handleToggleAudio}
           className={`flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-mono backdrop-blur-md border transition-all ${
@@ -2018,19 +2492,30 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
           <span className="text-slate-400 hidden sm:inline">
             Pressure:{' '}
             <strong className="text-slate-200">
-              {surfaceData.terrain3DConfig.isMoon ? '0.000 kPa (Hard Vacuum)' : `${surfaceData.atmosphericPressureKpa} kPa`}
+              {surfaceData.bodyType === 'earth'
+                ? '101.325 kPa (1.00 atm)'
+                : surfaceData.bodyType === 'moon' || surfaceData.terrain3DConfig.isMoon
+                  ? '0.000 kPa (Hard Vacuum)'
+                  : `${surfaceData.atmosphericPressureKpa} kPa`}
             </strong>
           </span>
           <span className="text-slate-600 hidden md:inline">|</span>
           <span className="text-slate-400 hidden md:inline">
-            {surfaceData.terrain3DConfig.isMoon ? (
+            {surfaceData.bodyType === 'earth' ? (
               <>
-                Gravity:{' '}
-                <strong className="text-purple-300">{surfaceData.terrain3DConfig.gravityMss || 0.0057} m/s² (Microgravity)</strong>
+                Gravity: <strong className="text-emerald-300">9.807 m/s² (1.0g Standard)</strong>
+              </>
+            ) : surfaceData.bodyType === 'moon' ? (
+              <>
+                Gravity: <strong className="text-purple-300">1.622 m/s² (0.166g Lunar)</strong>
+              </>
+            ) : surfaceData.terrain3DConfig.isMoon ? (
+              <>
+                Gravity: <strong className="text-purple-300">{surfaceData.terrain3DConfig.gravityMss || 0.0057} m/s² (Microgravity)</strong>
               </>
             ) : (
               <>
-                Ice: <strong className="text-blue-300">{surfaceData.waterIceDepthMeters}</strong>
+                Gravity: <strong className="text-orange-300">3.721 m/s² (0.38g)</strong>
               </>
             )}
           </span>

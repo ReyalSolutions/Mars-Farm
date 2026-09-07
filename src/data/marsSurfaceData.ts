@@ -16,6 +16,10 @@ export interface MarsSurfaceDetail {
   locationId: string;
   name: string;
   ancientName: string;
+  celestialBody?: 'mars' | 'earth' | 'moon';
+  bodyType?: 'mars' | 'earth' | 'moon';
+  hasOcean?: boolean;
+  hasClouds?: boolean;
   coordinates: string;
   elevation: string;
   atmosphericPressureKpa: number;
@@ -27,9 +31,9 @@ export interface MarsSurfaceDetail {
   geologicalContext: string;
   agriculturalAssessment: {
     suitabilityScore: number;
-    waterAccessRating: 'Abundant Ice Sheet' | 'Moderate Subsurface' | 'Deep Extraction' | 'Hydrated Phyllosilicate / Volatiles Baking';
-    lightingCondition: 'High Equatorial' | 'Balanced Mid-Latitude' | 'Sub-optimal Polar' | 'Unfiltered Cosmic Sunlight (Zero Atmosphere)';
-    thermalShieldingNeed: 'Moderate (Canyon buffer)' | 'Extreme (Auxiliary nuclear required)' | 'Natural Lava Tube Insulation' | 'Extreme Vacuum & Microgravity Containment';
+    waterAccessRating: 'Abundant Ice Sheet' | 'Moderate Subsurface' | 'Deep Extraction' | 'Hydrated Phyllosilicate / Volatiles Baking' | 'Surface Liquid Hydrosphere' | 'Deep Cryogenic Permafrost' | 'Permanently Shadowed Volatile Ice';
+    lightingCondition: 'High Equatorial' | 'Balanced Mid-Latitude' | 'Sub-optimal Polar' | 'Unfiltered Cosmic Sunlight (Zero Atmosphere)' | 'Continuous Peak of Eternal Light' | 'Humid Subtropical PAR';
+    thermalShieldingNeed: 'Moderate (Canyon buffer)' | 'Extreme (Auxiliary nuclear required)' | 'Natural Lava Tube Insulation' | 'Extreme Vacuum & Microgravity Containment' | 'Standard Terrestrial HVAC' | 'Extreme Lunar Vacuum & 14-Day Night Thermal Shielding';
     recommendedCrops: string[];
     caloricHarvestMultiplier: number;
   };
@@ -47,6 +51,11 @@ export interface MarsSurfaceDetail {
     isMoon?: boolean;
     moonType?: 'phobos' | 'deimos';
     gravityMss?: number;
+    bodyType?: 'mars' | 'earth' | 'moon';
+    earthType?: 'kennedy' | 'mauna-kea' | 'svalbard';
+    lunarType?: 'shackleton' | 'tranquility';
+    hasOcean?: boolean;
+    hasClouds?: boolean;
   };
   images: NasaSurfaceImage[];
 }
@@ -691,5 +700,410 @@ export const MARS_SURFACE_DATA: Record<string, MarsSurfaceDetail> = {
         isPanorama: true,
       }
     ]
-  }
+  },
+
+  // ── 3. Planet Earth Surface Stations & Analogues ─────────────────────────────
+  'kennedy-space-center': {
+    locationId: 'kennedy-space-center',
+    name: 'Kennedy Space Center (Space Coast)',
+    ancientName: 'NASA Space Coast · Launch Complex 39A / APH Facility',
+    celestialBody: 'earth',
+    coordinates: '28.5721° N, 80.6480° W',
+    elevation: '0.003 km (Atlantic Mean Sea Level)',
+    atmosphericPressureKpa: 101.325,
+    temperatureRangeC: { min: 10, max: 33, mean: 22 },
+    solarFluxWm2: 430,
+    waterIceDepthMeters: 'Direct sea-level freshwater aquifer & Atlantic hydrosphere',
+    radiationDoseMsvYear: 3.1,
+    dustOpticalDepthTau: 0.05,
+    geologicalContext:
+      'Coastal barrier island along Florida’s Atlantic shoreline. Home of the historic Apollo Saturn V and Space Shuttle launch pads (LC-39A/B) and NASA’s Space Life Sciences Lab. The site serves as the terrestrial ground-truth calibration facility for the Advanced Plant Habitat (APH) and Veggie flight experiments.',
+    agriculturalAssessment: {
+      suitabilityScore: 99,
+      waterAccessRating: 'Surface Liquid Hydrosphere',
+      lightingCondition: 'Humid Subtropical PAR',
+      thermalShieldingNeed: 'Standard Terrestrial HVAC',
+      recommendedCrops: ['Outredgeous Red Romaine', 'Dwarf Wheat', 'Mizuna Mustard', 'Super-Dwarf Tomato', 'Bok Choy'],
+      caloricHarvestMultiplier: 1.00,
+    },
+    terrain3DConfig: {
+      groundColorHex: 0x3d6836, // Coastal turf / subtropical loam
+      skyColorHex: 0x489be8, // Azure blue sky
+      fogDensity: 0.0012,
+      roughness: 0.65,
+      boulderDensity: 'sparse',
+      craterRimScale: 0.0,
+      dustStormColorHex: 0x557799, // Coastal sea-mist / rain storm
+      bodyType: 'earth',
+      earthType: 'kennedy',
+      gravityMss: 9.807,
+      hasOcean: true,
+      hasClouds: true,
+    },
+    images: [
+      {
+        id: 'ksc-pad-39a-aerial',
+        title: 'NASA Kennedy Space Center: Historic Launch Complex 39A & Atlantic Ocean',
+        mission: 'NASA Exploration Ground Systems',
+        instrument: 'High-Altitude Aerial Reconnaissance',
+        solOrDate: 'Artemis Operational Phase',
+        credit: 'NASA / Kim Shiflett',
+        description:
+          'Aerial view of Launch Complex 39A and the Atlantic coastline at Cape Canaveral, showing coastal vegetation, lagoon waters, and the pathway to orbit for deep space missions.',
+        imageUrl: 'https://images-assets.nasa.gov/image/KSC-20201115-PH-KLS01_0001/KSC-20201115-PH-KLS01_0001~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/KSC-20201115-PH-KLS01_0001/KSC-20201115-PH-KLS01_0001~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'ksc-aph-plant-growth',
+        title: 'NASA Advanced Plant Habitat (APH) Microgravity Growth Chamber',
+        mission: 'NASA Space Life Sciences / ISS Research',
+        instrument: 'Automated Biomass Multispectral Imaging Suite',
+        solOrDate: 'Expedition 56 Investigation',
+        credit: 'NASA / Kennedy Space Center',
+        description:
+          'The Advanced Plant Habitat (APH) is NASA’s largest plant growth facility, utilizing 180 sensors, calibrated LED spectrums (red, blue, green, far-red, white), and automated root fluidics to model multi-generational crop yields.',
+        imageUrl: 'https://images-assets.nasa.gov/image/iss056e201247/iss056e201247~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/iss056e201247/iss056e201247~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'ksc-merritt-island-lagoon',
+        title: 'Space Coast Atlantic Estuary & NASA Ecological Buffer',
+        mission: 'NASA Earth Observatory / Landsat 9',
+        instrument: 'Operational Land Imager-2 (OLI-2)',
+        solOrDate: 'Surface Baseline Observation',
+        credit: 'NASA / USGS',
+        description:
+          'High-resolution multispectral image of the Merritt Island National Wildlife Refuge surrounding Kennedy Space Center, balancing aerospace launch infrastructure with pristine coastal ecosystems.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA12235/PIA12235~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA12235/PIA12235~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+        isPanorama: true,
+      },
+    ],
+  },
+
+  'mauna-kea': {
+    locationId: 'mauna-kea',
+    name: 'HI-SEAS & Mauna Kea Analogue',
+    ancientName: 'Puu Waawaa Basalt Ridge · 4,205m Summit',
+    celestialBody: 'earth',
+    coordinates: '19.8206° N, 155.4681° W',
+    elevation: '4.205 km (Alpine Summit)',
+    atmosphericPressureKpa: 60.5,
+    temperatureRangeC: { min: -4, max: 11, mean: 3 },
+    solarFluxWm2: 520,
+    waterIceDepthMeters: 'Alpine sub-summit permafrost lenses & groundwater collection',
+    radiationDoseMsvYear: 4.8,
+    dustOpticalDepthTau: 0.02,
+    geologicalContext:
+      'Dormant shield volcano rising above the trade-wind inversion layer on the Big Island of Hawaii. The barren a‘ā and pāhoehoe basaltic lava fields closely resemble lunar mare and Martian volcanic plains, hosting NASA’s HI-SEAS habitat simulations.',
+    agriculturalAssessment: {
+      suitabilityScore: 84,
+      waterAccessRating: 'Moderate Subsurface',
+      lightingCondition: 'High Equatorial',
+      thermalShieldingNeed: 'Standard Terrestrial HVAC',
+      recommendedCrops: ['Solanum tuberosum (Andean Potato)', 'Quinoa', 'Highland Barley', 'Spinacia oleracea', 'Alpine Radish'],
+      caloricHarvestMultiplier: 1.15,
+    },
+    terrain3DConfig: {
+      groundColorHex: 0x5a4638, // Volcanic basalt cinder / tephra
+      skyColorHex: 0x3b82f6, // Ultra-clear deep alpine blue
+      fogDensity: 0.0006,
+      roughness: 0.92,
+      boulderDensity: 'heavy',
+      craterRimScale: 1.2,
+      dustStormColorHex: 0x6e5240,
+      bodyType: 'earth',
+      earthType: 'mauna-kea',
+      gravityMss: 9.807,
+      hasClouds: true,
+    },
+    images: [
+      {
+        id: 'mauna-kea-cinder-cones',
+        title: 'Mauna Kea Volcanic Cinder Plateau & Astronomy Ridge',
+        mission: 'NASA Earth Observatory / ASTER',
+        instrument: 'Advanced Spaceborne Thermal Emission and Reflection Radiometer',
+        solOrDate: 'High Altitude Survey',
+        credit: 'NASA / JPL / METI / ERSDAC / JAROS',
+        description:
+          'False-color thermal infrared image of Mauna Kea cinder cones showing weathered basaltic lava flows that provide the primary terrestrial analog for Martian volcanic plains.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA03444/PIA03444~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA03444/PIA03444~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'hi-seas-dome-habitat',
+        title: 'HI-SEAS Isolated Planetary Geodesic Habitat',
+        mission: 'NASA Human Research Program (HRP)',
+        instrument: 'Mission Field Documentation',
+        solOrDate: 'Mission VI Analogue',
+        credit: 'NASA / HI-SEAS / University of Hawaii',
+        description:
+          'The HI-SEAS (Hawaii Space Exploration Analog and Simulation) habitat dome positioned on the isolated volcanic slopes of Mauna Loa, testing closed-loop food systems and crew psychological dynamics.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA17596/PIA17596~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA17596/PIA17596~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'mauna-kea-alpine-sunset',
+        title: 'Mauna Kea Sea of Clouds Horizon Panorama',
+        mission: 'NASA Earth Observatory',
+        instrument: 'ISS Cupola High-Res Nikon',
+        solOrDate: 'Pacific Overpass Survey',
+        credit: 'NASA / ISS Crew Earth Observations',
+        description:
+          'Dramatic panoramic view looking over the trade-wind cloud deck from the Mauna Kea summit plateau, illustrating the crisp atmospheric clarity of high-altitude space analogs.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA01821/PIA01821~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA01821/PIA01821~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+        isPanorama: true,
+      },
+    ],
+  },
+
+  'svalbard-vault': {
+    locationId: 'svalbard-vault',
+    name: 'Svalbard Global Seed Vault',
+    ancientName: 'Platåberget Permafrost Repository · 78°N Arctic',
+    celestialBody: 'earth',
+    coordinates: '78.2358° N, 15.4913° E',
+    elevation: '0.130 km (Sandstone Mountain Portal)',
+    atmosphericPressureKpa: 100.8,
+    temperatureRangeC: { min: -20, max: 8, mean: -5 },
+    solarFluxWm2: 120,
+    waterIceDepthMeters: 'Continuous Arctic permafrost ice bedrock (130m deep)',
+    radiationDoseMsvYear: 2.8,
+    dustOpticalDepthTau: 0.01,
+    geologicalContext:
+      'Embedded 130 meters inside Platåberget in the Norwegian Arctic archipelago of Svalbard. Encased in frozen permafrost sandstone, the facility safeguards over 1.2 million distinct agricultural crop seed samples, serving as humanity’s ultimate biological genetic backup.',
+    agriculturalAssessment: {
+      suitabilityScore: 79,
+      waterAccessRating: 'Deep Cryogenic Permafrost',
+      lightingCondition: 'Sub-optimal Polar',
+      thermalShieldingNeed: 'Standard Terrestrial HVAC',
+      recommendedCrops: ['Triticum aestivum (Winter Wheat)', 'Secale cereale (Rye)', 'Brassica oleracea', 'Pisum sativum', 'Solanum microdontum'],
+      caloricHarvestMultiplier: 1.10,
+    },
+    terrain3DConfig: {
+      groundColorHex: 0xd8e4e8, // Arctic snow & permafrost rock
+      skyColorHex: 0x7ca8cc, // Pale polar arctic sky
+      fogDensity: 0.0018,
+      roughness: 0.70,
+      boulderDensity: 'moderate',
+      craterRimScale: 0.8,
+      dustStormColorHex: 0xc8d8e0, // Arctic blizzard / whiteout
+      hasIceFrost: true,
+      bodyType: 'earth',
+      earthType: 'svalbard',
+      gravityMss: 9.807,
+      hasClouds: true,
+    },
+    images: [
+      {
+        id: 'svalbard-vault-portal',
+        title: 'Svalbard Global Seed Vault Iconic Arctic Portal',
+        mission: 'NordGen / Global Crop Diversity Trust / NASA Landsat',
+        instrument: 'Multispectral Cryospheric Imager',
+        solOrDate: 'Arctic Winter Survey',
+        credit: 'NordGen / Norwegian Ministry of Agriculture and Food',
+        description:
+          'The striking concrete entrance portal of the Svalbard Global Seed Vault protruding from the snow-covered sandstone slopes of Platåberget, illuminated by fiber-optic installation art reflecting arctic aurora.',
+        imageUrl: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'svalbard-interior-crypt',
+        title: 'Deep Bedrock Cryogenic Seed Storage Crypt (-18°C)',
+        mission: 'Global Crop Diversity Trust',
+        instrument: 'Vault Cryogenic Telemetry Logging',
+        solOrDate: 'Repository Archive Verification',
+        credit: 'Global Crop Diversity Trust / NordGen',
+        description:
+          'Interior storage crypt maintaining 1.2 million sample packets sealed inside four-ply foil packages at -18°C (-0.4°F), safe from war, civil strife, and planetary catastrophe.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA02652/PIA02652~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA02652/PIA02652~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'svalbard-spitsbergen-glaciers',
+        title: 'Spitsbergen Island Fjord & Glacial Valley Vista',
+        mission: 'NASA Earth Observatory / Terra MODIS',
+        instrument: 'Moderate Resolution Imaging Spectroradiometer (MODIS)',
+        solOrDate: 'High-Latitude Seasonal Mosaic',
+        credit: 'NASA / GSFC',
+        description:
+          'Panoramic satellite mosaic of the Svalbard archipelago illustrating the extensive glacial field and ice-locked sea fjords surrounding the seed vault site.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA14422/PIA14422~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA14422/PIA14422~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+        isPanorama: true,
+      },
+    ],
+  },
+
+  // ── 4. The Moon (Luna) Surface Bases & Craters ───────────────────────────────
+  'shackleton-crater': {
+    locationId: 'shackleton-crater',
+    name: 'Shackleton Crater (Artemis Base Camp)',
+    ancientName: 'Lunar South Pole · Peaks of Eternal Light',
+    celestialBody: 'moon',
+    coordinates: '89.9° S, 0.0° E (Lunar South Pole)',
+    elevation: '-4.2 km (Crater Interior Floor)',
+    atmosphericPressureKpa: 0.000,
+    temperatureRangeC: { min: -248, max: -10, mean: -50 },
+    solarFluxWm2: 440,
+    waterIceDepthMeters: 'Gigatons of deep volatile ice sheets inside permanently shadowed cold traps',
+    radiationDoseMsvYear: 1360,
+    dustOpticalDepthTau: 0.00,
+    geologicalContext:
+      'Impact crater at the Lunar South Pole whose 4.2-km-high rim peaks receive near-continuous sunlight (up to 92% of the lunar year), while its deep interior floor lies in perpetual darkness at -248°C (25 Kelvin). NASA Artemis has selected this perimeter for humanity’s first permanent lunar habitat camp and water extraction refinery.',
+    agriculturalAssessment: {
+      suitabilityScore: 91,
+      waterAccessRating: 'Permanently Shadowed Volatile Ice',
+      lightingCondition: 'Continuous Peak of Eternal Light',
+      thermalShieldingNeed: 'Extreme Lunar Vacuum & 14-Day Night Thermal Shielding',
+      recommendedCrops: ['Artemis Micro-Greens', 'Chlorella vulgaris', 'Dwarf Sweet Potato', 'Soybean cultivar 88', 'Radish Cherry Belle'],
+      caloricHarvestMultiplier: 1.45,
+    },
+    terrain3DConfig: {
+      groundColorHex: 0x888684, // Pulverized lunar anorthosite regolith
+      skyColorHex: 0x000003, // Pitch black cosmic vacuum
+      fogDensity: 0.0001,
+      roughness: 0.88,
+      boulderDensity: 'moderate',
+      craterRimScale: 3.5,
+      dustStormColorHex: 0x333344,
+      hasIceFrost: true,
+      isMoon: true,
+      bodyType: 'moon',
+      lunarType: 'shackleton',
+      gravityMss: 1.62,
+    },
+    images: [
+      {
+        id: 'shackleton-lroc-polar-mosaic',
+        title: 'NASA LRO: Shackleton Crater Rim Peaks of Eternal Light',
+        mission: 'NASA Lunar Reconnaissance Orbiter (LRO)',
+        instrument: 'Lunar Reconnaissance Orbiter Camera (LROC NAC)',
+        solOrDate: 'Polar Illumination Campaign',
+        credit: 'NASA / GSFC / Arizona State University',
+        description:
+          'High-resolution multi-orbit illumination mosaic of the 21-km-wide Shackleton Crater rim, revealing the elevated ridges that enjoy continuous solar power while the deep interior floor remains in billion-year shadow.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA13517/PIA13517~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA13517/PIA13517~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'shackleton-diviner-temperature',
+        title: 'LRO Diviner: Cryogenic 25-Kelvin South Pole Cold Traps',
+        mission: 'NASA Lunar Reconnaissance Orbiter',
+        instrument: 'Diviner Lunar Radiometer Experiment',
+        solOrDate: 'Thermal Mapping Cycle',
+        credit: 'NASA / JPL-Caltech / UCLA',
+        description:
+          'Thermal emission mapping confirming Shackleton Crater floor reaches an astonishing -248°C (25 Kelvin), cold enough to trap water ice, methane, ammonia, and organic volatiles over astronomical timescales.',
+        imageUrl: 'https://images-assets.nasa.gov/image/PIA12231/PIA12231~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/PIA12231/PIA12231~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'artemis-orion-earthrise',
+        title: 'NASA Artemis 1: Earthrise Over the Lunar South Horizon',
+        mission: 'NASA Artemis 1 Flight Test',
+        instrument: 'Orion Optical Navigation Camera',
+        solOrDate: 'Mission Day 20 Flyby',
+        credit: 'NASA / Johnson Space Center',
+        description:
+          'Stunning view of the bright blue Earth rising above the jagged cratered lunar limb, captured by the uncrewed Orion spacecraft during its record-breaking lunar orbit flight test.',
+        imageUrl: 'https://images-assets.nasa.gov/image/art001e000672/art001e000672~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/art001e000672/art001e000672~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+        isPanorama: true,
+      },
+    ],
+  },
+
+  'tranquility-base': {
+    locationId: 'tranquility-base',
+    name: 'Tranquility Base (Apollo 11 Outpost)',
+    ancientName: 'Mare Tranquillitatis · Statio Tranquillitatis',
+    celestialBody: 'moon',
+    coordinates: '0.674° N, 23.473° E',
+    elevation: '-1.2 km (Lunar Mean Radius)',
+    atmosphericPressureKpa: 0.000,
+    temperatureRangeC: { min: -173, max: 117, mean: -20 },
+    solarFluxWm2: 430,
+    waterIceDepthMeters: 'Dry ilmenite & pyroxene regolith (oxygen extracted via hydrogen reduction)',
+    radiationDoseMsvYear: 1420,
+    dustOpticalDepthTau: 0.00,
+    geologicalContext:
+      'Historic site where human boots first touched another world on July 20, 1969. The flat, basaltic mare volcanic plains are composed of titanium-rich ilmenite regolith. In the sky above, the radiant blue planet Earth hangs stationary at 60° elevation under an eternal star-filled cosmic night.',
+    agriculturalAssessment: {
+      suitabilityScore: 82,
+      waterAccessRating: 'Hydrated Phyllosilicate / Volatiles Baking',
+      lightingCondition: 'High Equatorial',
+      thermalShieldingNeed: 'Extreme Lunar Vacuum & 14-Day Night Thermal Shielding',
+      recommendedCrops: ['Basalt Hydroponic Spirulina', 'Lemna minor (Duckweed)', 'Arabidopsis thaliana (Apollo Lunar Regolith Trial)', 'Dwarf Wheat'],
+      caloricHarvestMultiplier: 1.35,
+    },
+    terrain3DConfig: {
+      groundColorHex: 0x767472, // Basaltic lunar mare grey
+      skyColorHex: 0x000002, // Vacuum black
+      fogDensity: 0.0001,
+      roughness: 0.85,
+      boulderDensity: 'sparse',
+      craterRimScale: 2.0,
+      dustStormColorHex: 0x222233,
+      isMoon: true,
+      bodyType: 'moon',
+      lunarType: 'tranquility',
+      gravityMss: 1.62,
+    },
+    images: [
+      {
+        id: 'apollo11-aldrin-visior',
+        title: 'Apollo 11: Buzz Aldrin on the Lunar Surface with Gold Visor',
+        mission: 'NASA Apollo 11 Lunar Landing',
+        instrument: '70mm Hasselblad 500EL Data Camera',
+        solOrDate: 'July 20, 1969',
+        credit: 'NASA / Neil A. Armstrong',
+        description:
+          'Astronaut Buzz Aldrin photographed standing in the powdery lunar regolith. Reflected in his gold sun visor are astronaut Neil Armstrong, the Lunar Module Eagle, the American flag, and the solar wind composition experiment.',
+        imageUrl: 'https://images-assets.nasa.gov/image/as11-40-5903/as11-40-5903~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/as11-40-5903/as11-40-5903~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'apollo11-eagle-descent-stage',
+        title: 'Apollo 11 Lunar Module Eagle Descent Stage at Tranquility Base',
+        mission: 'NASA Apollo 11',
+        instrument: '70mm Hasselblad Camera',
+        solOrDate: 'July 20, 1969',
+        credit: 'NASA / Apollo 11 Crew',
+        description:
+          'The golden Kapton-foil insulated descent stage of Lunar Module Eagle resting on the powdery soil of Mare Tranquillitatis, showing landing footpads with lunar surface probes.',
+        imageUrl: 'https://images-assets.nasa.gov/image/AS11-40-5886/AS11-40-5886~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/AS11-40-5886/AS11-40-5886~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+      },
+      {
+        id: 'apollo11-earth-overhead',
+        title: 'Radiant Blue Earth Suspended Above the Stark Lunar Horizon',
+        mission: 'NASA Apollo 11',
+        instrument: '70mm Hasselblad Camera',
+        solOrDate: 'Lunar Orbit & Surface Ingress',
+        credit: 'NASA / Apollo 11',
+        description:
+          'Classic photograph of the fragile, luminous Earth glowing in the pitch-black void of space above the stark, cratered lunar surface.',
+        imageUrl: 'https://images-assets.nasa.gov/image/AS11-44-6552/AS11-44-6552~medium.jpg',
+        thumbnailUrl: 'https://images-assets.nasa.gov/image/AS11-44-6552/AS11-44-6552~thumb.jpg',
+        fallbackUrl: '/textures/earth_realistic.jpg',
+        isPanorama: true,
+      },
+    ],
+  },
 };

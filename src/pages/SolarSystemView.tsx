@@ -907,9 +907,11 @@ export const SolarSystemView: React.FC = () => {
     }
   }, [planets]);
 
-  // ── Cinematic Mars / Moons Atmospheric Entry, Descent & Landing Trigger ────────
+  // ── Cinematic Celestial Body Atmospheric Entry, Descent & Landing Trigger ────────
   const handleInitiateDescent = useCallback((loc: MarsLocation) => {
-    const isMoon = loc.type === 'Martian Moon' || loc.id === 'phobos' || loc.id === 'deimos';
+    const isEarth = loc.celestialBody === 'earth' || loc.type === 'Earth Station';
+    const isEarthMoon = loc.celestialBody === 'moon' || loc.type === 'Lunar Base' || loc.type === 'Lunar Mare';
+    const isMartianMoon = loc.type === 'Martian Moon' || loc.id === 'phobos' || loc.id === 'deimos';
 
     // 1. Clear any open inspection panels
     setSelectedMarsLocation(null);
@@ -920,17 +922,24 @@ export const SolarSystemView: React.FC = () => {
     setSelectedSpacecraft(null);
     setIsSunSelected(false);
 
-    // 2. Lock camera tracking target to Mars or Moon
-    if (isMoon) {
+    // 2. Lock camera tracking target to Earth, Moon, Martian Moon, or Mars
+    if (isEarth) {
+      focusedBodyIdRef.current = 'earth';
+      setFocusedBodyId('earth');
+      marsAudioService.startDescentAudio('earth');
+    } else if (isEarthMoon) {
+      focusedBodyIdRef.current = 'moon';
+      setFocusedBodyId('moon');
+      marsAudioService.startDescentAudio('moon');
+    } else if (isMartianMoon) {
       focusedBodyIdRef.current = loc.id;
       setFocusedBodyId(loc.id);
+      marsAudioService.startDescentAudio('martian-moon');
     } else {
       focusedBodyIdRef.current = 'mars';
       setFocusedBodyId('mars');
+      marsAudioService.startDescentAudio('mars');
     }
-
-    // Trigger authentic EDL / Moon orbital descent audio simulation
-    marsAudioService.startDescentAudio(isMoon);
 
     if (!controlsRef.current) {
       navigate(`/surface/${loc.id}?descent=1`);
@@ -950,15 +959,37 @@ export const SolarSystemView: React.FC = () => {
       cameraStartTarget: controlsRef.current.target.clone(),
     };
 
+    let initialAlt = 125;
+    let initialVel = 21200;
+    let initialStage = 'ATMOSPHERIC ENTRY INTERFACE (ALT: 125 KM)';
+    let initialHeat = 1850;
+
+    if (isEarth) {
+      initialAlt = 120;
+      initialVel = 28000;
+      initialStage = 'ORBITAL DE-ORBIT BURN & ENTRY INTERFACE (ALT: 120 KM)';
+      initialHeat = 1650;
+    } else if (isEarthMoon) {
+      initialAlt = 15;
+      initialVel = 5800;
+      initialStage = 'LUNAR MODULE POWERED DESCENT INITIATION (PDI)';
+      initialHeat = -120;
+    } else if (isMartianMoon) {
+      initialAlt = 25;
+      initialVel = 7800;
+      initialStage = 'DE-ORBIT BRAKING & VACUUM TRAJECTORY';
+      initialHeat = -45;
+    }
+
     setEdlSequence({
       active: true,
       location: loc,
       startTime,
       durationMs,
-      altitudeKm: isMoon ? 25 : 125,
-      velocityKmh: isMoon ? 7800 : 21200,
-      stageName: isMoon ? 'DE-ORBIT BRAKING & ORBITAL DESCENT' : 'ATMOSPHERIC ENTRY INTERFACE (ALT: 125 KM)',
-      heatTempC: isMoon ? -45 : 1850,
+      altitudeKm: initialAlt,
+      velocityKmh: initialVel,
+      stageName: initialStage,
+      heatTempC: initialHeat,
     });
   }, [navigate]);
 
@@ -2255,13 +2286,32 @@ export const SolarSystemView: React.FC = () => {
         // Smooth cubic ease in-out
         const t = rawT < 0.5 ? 4 * rawT * rawT * rawT : 1 - Math.pow(-2 * rawT + 2, 3) / 2;
 
-        const isMoon = edl.location.type === 'Martian Moon' || edl.location.id === 'phobos' || edl.location.id === 'deimos';
+        const isEarth = edl.location.celestialBody === 'earth' || edl.location.type === 'Earth Station';
+        const isEarthMoon = edl.location.celestialBody === 'moon' || edl.location.type === 'Lunar Base' || edl.location.type === 'Lunar Mare';
+        const isMartianMoon = edl.location.type === 'Martian Moon' || edl.location.id === 'phobos' || edl.location.id === 'deimos';
 
         let targetWorldPos = new THREE.Vector3();
         let terminalCamPos = new THREE.Vector3();
 
-        if (isMoon) {
-          // Track the orbiting moon mesh
+        if (isEarth) {
+          // Track the Earth mesh
+          const earthEntry = planetMeshesRef.current.find(p => p.data.id === 'earth');
+          if (earthEntry) {
+            earthEntry.mesh.getWorldPosition(targetWorldPos);
+          }
+          terminalCamPos = targetWorldPos.clone().add(new THREE.Vector3(0.02, 0.035, 0.045));
+        } else if (isEarthMoon) {
+          // Track the Moon (Luna) mesh
+          const moonEntry = moonMeshesRef.current.find(m => m.data.id === 'moon');
+          if (moonEntry) {
+            moonEntry.mesh.getWorldPosition(targetWorldPos);
+          } else {
+            const earthEntry = planetMeshesRef.current.find(p => p.data.id === 'earth');
+            if (earthEntry) earthEntry.mesh.getWorldPosition(targetWorldPos);
+          }
+          terminalCamPos = targetWorldPos.clone().add(new THREE.Vector3(0.015, 0.02, 0.035));
+        } else if (isMartianMoon) {
+          // Track the orbiting Martian moon mesh
           const moonEntry = moonMeshesRef.current.find(m => m.data.id === edl.location.id);
           if (moonEntry) {
             moonEntry.mesh.getWorldPosition(targetWorldPos);
@@ -2269,7 +2319,6 @@ export const SolarSystemView: React.FC = () => {
             const marsEntry = planetMeshesRef.current.find(p => p.data.id === 'mars');
             if (marsEntry) targetWorldPos.copy(marsEntry.mesh.position);
           }
-          // Microgravity orbital approach: camera pulls in close above the moon
           terminalCamPos = targetWorldPos.clone().add(new THREE.Vector3(0.015, 0.02, 0.035));
         } else {
           // Locate current world position of Mars and the landing site pin
@@ -2304,7 +2353,25 @@ export const SolarSystemView: React.FC = () => {
         let heatC: number;
         let stage: string;
 
-        if (isMoon) {
+        if (isEarth) {
+          altKm = Math.max(0, 120 * Math.pow(1 - rawT, 2.3));
+          velKmh = Math.max(0, Math.round(28000 * Math.pow(1 - rawT, 2.1)));
+          heatC = Math.max(25, Math.round(1650 * Math.sin(rawT * Math.PI)));
+          if (rawT < 0.22) stage = 'ORBITAL DE-ORBIT BURN & ENTRY INTERFACE (ALT: 120 KM)';
+          else if (rawT < 0.48) stage = 'HYPERSONIC RE-ENTRY & IONIZATION BLACKOUT (MACH 25)';
+          else if (rawT < 0.72) stage = 'SUPERSONIC DECELERATION & DROGUE PARACHUTE DEPLOY';
+          else if (rawT < 0.88) stage = 'TERMINAL APPROACH & FLARE / RUNWAY ALIGNMENT';
+          else stage = 'WHEELS STOP / TOUCHDOWN CONFIRMED';
+        } else if (isEarthMoon) {
+          altKm = Math.max(0, 15 * Math.pow(1 - rawT, 2.0));
+          velKmh = Math.max(0, Math.round(5800 * Math.pow(1 - rawT, 1.8)));
+          heatC = Math.max(-120, Math.round(-120 + 30 * Math.sin(rawT * Math.PI)));
+          if (rawT < 0.25) stage = 'LUNAR ORBIT INSERTION & DE-ORBIT BRAKING BURN';
+          else if (rawT < 0.52) stage = 'POWERED DESCENT INITIATION (PDI) & RADAR ALTIMETRY';
+          else if (rawT < 0.75) stage = 'PITCH-OVER & CRATER AVOIDANCE GUIDANCE (APOLLO LPD)';
+          else if (rawT < 0.90) stage = 'TERMINAL VERTICAL HOVER & CONTACT LIGHT PROBE';
+          else stage = 'THE EAGLE HAS LANDED · TRANQUILITY TOUCHDOWN';
+        } else if (isMartianMoon) {
           altKm = Math.max(0, 25 * Math.pow(1 - rawT, 2.2));
           velKmh = Math.max(0, Math.round(7800 * Math.pow(1 - rawT, 1.8)));
           heatC = Math.max(-45, Math.round(-45 + 55 * Math.sin(rawT * Math.PI)));
@@ -2624,6 +2691,43 @@ export const SolarSystemView: React.FC = () => {
             </button>
           </div>
         )}
+
+        {planet.id === 'earth' && (
+          <div className="space-y-2 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
+                Earth Spaceports & Stations
+              </span>
+              <span className="text-[10px] font-mono text-slate-500">3 Locations</span>
+            </div>
+            <div className="grid grid-cols-1 gap-1.5">
+              {MARS_LOCATIONS.filter(loc => loc.celestialBody === 'earth').map(loc => (
+                <button
+                  key={loc.id}
+                  onClick={() => handleInitiateDescent(loc)}
+                  className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-emerald-950/30 hover:bg-emerald-900/50 border border-emerald-500/40 hover:border-emerald-400 text-[11px] font-mono text-emerald-200 hover:text-white transition-all text-left group cursor-pointer shadow-sm"
+                >
+                  <span className="truncate">{loc.name}</span>
+                  <ChevronRight className="w-3 h-3 text-emerald-400 flex-shrink-0 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => {
+                const ksc = MARS_LOCATIONS.find(l => l.id === 'kennedy-space-center') || MARS_LOCATIONS[0];
+                handleInitiateDescent(ksc);
+              }}
+              className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white text-xs font-mono transition-all font-bold group cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.35)] border border-emerald-400/40 mt-1"
+            >
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-emerald-200 animate-pulse" />
+                <span>Descend to Earth Surface (3D & Audio)</span>
+              </div>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -2776,6 +2880,43 @@ export const SolarSystemView: React.FC = () => {
             </div>
             <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
+        )}
+
+        {moon.id === 'moon' && (
+          <div className="space-y-2 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-purple-400 font-bold uppercase tracking-wider">
+                Lunar Surface Bases & Sites
+              </span>
+              <span className="text-[10px] font-mono text-slate-500">2 Bases</span>
+            </div>
+            <div className="grid grid-cols-1 gap-1.5">
+              {MARS_LOCATIONS.filter(loc => loc.celestialBody === 'moon').map(loc => (
+                <button
+                  key={loc.id}
+                  onClick={() => handleInitiateDescent(loc)}
+                  className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-purple-950/30 hover:bg-purple-900/50 border border-purple-500/40 hover:border-purple-400 text-[11px] font-mono text-purple-200 hover:text-white transition-all text-left group cursor-pointer shadow-sm"
+                >
+                  <span className="truncate">{loc.name}</span>
+                  <ChevronRight className="w-3 h-3 text-purple-400 flex-shrink-0 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => {
+                const base = MARS_LOCATIONS.find(l => l.id === 'tranquility-base') || MARS_LOCATIONS[0];
+                handleInitiateDescent(base);
+              }}
+              className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-sky-600 hover:from-purple-500 hover:to-sky-500 text-white text-xs font-mono transition-all font-bold group cursor-pointer shadow-[0_0_20px_rgba(147,51,234,0.35)] border border-purple-400/40 mt-1"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-200 animate-pulse" />
+                <span>Descend to Lunar Surface (Apollo / Artemis)</span>
+              </div>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         )}
       </div>
     </div>
