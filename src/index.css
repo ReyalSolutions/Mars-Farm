@@ -104,6 +104,15 @@
   .glow-bio {
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
   }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Accessibility: Respect reduced-motion user preference */
