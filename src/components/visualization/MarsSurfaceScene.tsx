@@ -436,32 +436,60 @@ const createSiteRealisticTerrainTextures = (surfaceData: MarsSurfaceDetail) => {
     rCtx.fillStyle = 'rgba(215, 215, 215, 0.85)';
     rCtx.fillRect(0, 0, size, size);
   } else if (locId === 'kennedy-space-center') {
-    // ── Kennedy Space Center: Merritt Island Coastal Turf, Crawlerway & Launch Apron ──
-    ctx.fillStyle = 'rgba(46, 125, 50, 0.45)';
-    for (let g = 0; g < 40; g++) {
+    // ── Kennedy Space Center: Photorealistic Coastal Scrub & Launch Complex 39A ──
+    // 1. Natural coastal subtropical turf & scrub gradient
+    const turfGrad = ctx.createRadialGradient(size * 0.5, size * 0.5, 50, size * 0.5, size * 0.5, size * 0.7);
+    turfGrad.addColorStop(0, 'rgba(46, 125, 50, 0.6)');
+    turfGrad.addColorStop(0.5, 'rgba(34, 100, 42, 0.7)');
+    turfGrad.addColorStop(1, 'rgba(21, 67, 30, 0.85)');
+    ctx.fillStyle = turfGrad;
+    ctx.fillRect(0, 0, size, size);
+
+    // 2. High-frequency natural grass & soil noise
+    for (let g = 0; g < 600; g++) {
       const gx = Math.random() * size;
       const gy = Math.random() * size;
-      ctx.beginPath();
-      ctx.ellipse(gx, gy, 45, 25, Math.random() * Math.PI, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(74, 150, 60, 0.25)' : 'rgba(20, 55, 25, 0.3)';
+      ctx.fillRect(gx, gy, Math.random() * 4 + 1, Math.random() * 4 + 1);
     }
-    // Concrete launch apron and tarmac
-    ctx.fillStyle = 'rgba(170, 175, 180, 0.75)';
-    bCtx.fillStyle = 'rgb(160, 160, 160)';
-    rCtx.fillStyle = 'rgb(120, 120, 120)';
-    ctx.fillRect(size * 0.2, size * 0.35, size * 0.6, size * 0.3);
-    bCtx.fillRect(size * 0.2, size * 0.35, size * 0.6, size * 0.3);
-    rCtx.fillRect(size * 0.2, size * 0.35, size * 0.6, size * 0.3);
 
-    // High-visibility yellow safety boundary stripes
-    ctx.strokeStyle = 'rgba(234, 179, 8, 0.85)';
-    ctx.lineWidth = 4;
+    // 3. Central Pad 39A Launch Mount Octagonal Concrete Surface
+    const cx = size * 0.5, cy = size * 0.5, padRadius = size * 0.18;
     ctx.beginPath();
-    ctx.moveTo(size * 0.25, size * 0.4);
-    ctx.lineTo(size * 0.75, size * 0.4);
-    ctx.moveTo(size * 0.25, size * 0.6);
-    ctx.lineTo(size * 0.75, size * 0.6);
-    ctx.stroke();
+    bCtx.beginPath();
+    rCtx.beginPath();
+    for (let a = 0; a < 8; a++) {
+      const angle = (a * Math.PI) / 4 + Math.PI / 8;
+      const px = cx + padRadius * Math.cos(angle);
+      const py = cy + padRadius * Math.sin(angle);
+      if (a === 0) {
+        ctx.moveTo(px, py); bCtx.moveTo(px, py); rCtx.moveTo(px, py);
+      } else {
+        ctx.lineTo(px, py); bCtx.lineTo(px, py); rCtx.lineTo(px, py);
+      }
+    }
+    ctx.closePath(); bCtx.closePath(); rCtx.closePath();
+    ctx.fillStyle = 'rgba(140, 145, 150, 0.9)';
+    bCtx.fillStyle = 'rgb(180, 180, 180)';
+    rCtx.fillStyle = 'rgb(110, 110, 110)';
+    ctx.fill(); bCtx.fill(); rCtx.fill();
+
+    // 4. Flame Trench dark refractory blast channel
+    ctx.fillStyle = 'rgba(25, 28, 32, 0.95)';
+    bCtx.fillStyle = 'rgb(40, 40, 40)';
+    rCtx.fillStyle = 'rgb(200, 200, 200)';
+    ctx.fillRect(cx - padRadius * 0.9, cy - padRadius * 0.28, padRadius * 1.8, padRadius * 0.56);
+    bCtx.fillRect(cx - padRadius * 0.9, cy - padRadius * 0.28, padRadius * 1.8, padRadius * 0.56);
+    rCtx.fillRect(cx - padRadius * 0.9, cy - padRadius * 0.28, padRadius * 1.8, padRadius * 0.56);
+
+    // 5. Dual Crawlerway crushed rock tracks
+    ctx.fillStyle = 'rgba(190, 155, 120, 0.85)';
+    bCtx.fillStyle = 'rgb(195, 195, 195)';
+    rCtx.fillStyle = 'rgb(170, 170, 170)';
+    ctx.fillRect(cx - padRadius * 0.6, cy + padRadius * 0.8, padRadius * 0.45, size * 0.5);
+    ctx.fillRect(cx + padRadius * 0.15, cy + padRadius * 0.8, padRadius * 0.45, size * 0.5);
+    bCtx.fillRect(cx - padRadius * 0.6, cy + padRadius * 0.8, padRadius * 0.45, size * 0.5);
+    bCtx.fillRect(cx + padRadius * 0.15, cy + padRadius * 0.8, padRadius * 0.45, size * 0.5);
   } else if (locId === 'mauna-kea') {
     // ── Mauna Kea: High-Altitude Basaltic Cinder Cones & Volcanic Scoria ──
     ctx.fillStyle = 'rgba(35, 25, 22, 0.7)';
@@ -1230,29 +1258,35 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
           }
         }
       } else if (isEarth) {
-        // ── Earth Terrain: Flat Coastal / Mountain Volcano / Arctic Plateau ──
+        // ── Earth Terrain: Authentic 3D Topography ──
         if (locId === 'kennedy-space-center') {
-          // Flat coastal Florida plain with dunes and ocean depression at east edge
-          elevation = Math.sin(x * 0.03) * Math.cos(z * 0.03) * 0.4;
-          if (x > 32) {
-            elevation = -0.35; // Ocean water boundary
-          } else if (distFromCenter < 16) {
-            elevation = 0.05; // Concrete launch pad apron
+          // Elevated Launch Pad 39A mount, crawlerway approach berm, and Atlantic dunes
+          if (distFromCenter < 12) {
+            elevation = 3.2 - (distFromCenter * 0.08); // 3.2m elevated concrete launch pad apron
+          } else if (distFromCenter < 22) {
+            elevation = 1.6 + 1.6 * Math.cos(((distFromCenter - 12) * Math.PI) / 10);
+          } else {
+            // Coastal dune ridges and gentle Florida scrub slope
+            elevation = Math.sin(x * 0.08) * Math.cos(z * 0.08) * 0.9 + Math.sin(x * 0.2 + z * 0.1) * 0.4;
+          }
+          // Atlantic Ocean shoreline slope to the East
+          if (x > 36) {
+            elevation = -0.55 + Math.sin(z * 0.1) * 0.1;
           }
         } else if (locId === 'mauna-kea') {
-          // High-altitude volcanic cinder cone mountain slope
-          elevation = (x * 0.14) + (Math.sin(z * 0.08) * 1.8) + (Math.cos(x * 0.12) * 0.9);
+          // Alpine volcanic shield slope and cinder cone ridges
+          elevation = (Math.sin(x * 0.06) * 3.8) + (Math.cos(z * 0.06) * 3.2) + Math.sin(x * 0.14 + z * 0.14) * 1.4;
           if (distFromCenter < 14) {
-            elevation *= Math.max(0, (distFromCenter - 4) / 10) * 0.2;
+            elevation *= Math.max(0.4, (distFromCenter - 4) / 10);
           }
         } else {
-          // Svalbard: Sandstone plateau with steep mountain cliff face
-          elevation = Math.sin(x * 0.06) * Math.cos(z * 0.06) * 0.7;
-          if (z < -22) {
-            elevation += Math.pow(Math.abs(z + 22) * 0.25, 1.7) * 0.8;
+          // Svalbard: Rugged Arctic mountain peaks and glacial valley
+          elevation = (Math.sin(x * 0.07) * 3.2) + (Math.cos(z * 0.07) * 2.8);
+          if (z < -10) {
+            elevation += Math.pow(Math.abs(z + 10) * 0.22, 1.6) * 2.4;
           }
-          if (distFromCenter < 14) {
-            elevation *= Math.max(0, (distFromCenter - 4) / 10) * 0.15;
+          if (distFromCenter < 12) {
+            elevation *= Math.max(0.3, (distFromCenter - 4) / 8);
           }
         }
       } else if (isMartianMoon) {
@@ -1333,13 +1367,17 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
     // ── 5A.1 Real Satellite Imagery Draping (NASA Landsat / ASTER / Google Earth Ortho) ──
     if (surfaceData.satelliteTextureUrl) {
       const satTexLoader = new THREE.TextureLoader();
-      satTexLoader.setCrossOrigin('anonymous');
       satTexLoader.load(
         surfaceData.satelliteTextureUrl,
         (satTex) => {
           satTex.colorSpace = THREE.SRGBColorSpace;
           satTex.wrapS = THREE.ClampToEdgeWrapping;
           satTex.wrapT = THREE.ClampToEdgeWrapping;
+          satTex.repeat.set(1, 1);
+          satTex.anisotropy = 16;
+          satTex.minFilter = THREE.LinearMipmapLinearFilter;
+          satTex.magFilter = THREE.LinearFilter;
+          satTex.generateMipmaps = true;
           terrainMat.map = satTex;
           terrainMat.needsUpdate = true;
           setIsSatelliteOrthoActive(true);
@@ -1592,16 +1630,38 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
         metalness: 0.05,
       });
 
-      const boulder = new THREE.Mesh(bGeo, bMat);
       const angle = Math.random() * Math.PI * 2;
-      const radius = 10 + Math.random() * 50;
+      const radius = 12 + Math.random() * 52;
       const bx = radius * Math.cos(angle);
       const bz = radius * Math.sin(angle);
-      boulder.position.set(bx, 0.35, bz);
-      boulder.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-      boulder.castShadow = true;
-      boulder.receiveShadow = true;
-      boulderGroup.add(boulder);
+
+      if (isEarth && surfaceData.locationId === 'kennedy-space-center') {
+        // Florida Coastal Palm / Pine Trees
+        const treeGroup = new THREE.Group();
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 3.2 + Math.random() * 2, 8), trunkMat);
+        trunk.position.y = 1.8;
+        trunk.rotation.z = (Math.random() - 0.5) * 0.15;
+        treeGroup.add(trunk);
+
+        const crownMat = new THREE.MeshStandardMaterial({ color: 0x1e6f30, roughness: 0.75 });
+        for (let f = 0; f < 6; f++) {
+          const frond = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.0, 5), crownMat);
+          frond.position.set(0, 3.2, 0);
+          frond.rotation.z = 0.55;
+          frond.rotation.y = (f * Math.PI) / 3;
+          treeGroup.add(frond);
+        }
+        treeGroup.position.set(bx, 0, bz);
+        boulderGroup.add(treeGroup);
+      } else {
+        const boulder = new THREE.Mesh(bGeo, bMat);
+        boulder.position.set(bx, 0.35, bz);
+        boulder.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+        boulder.castShadow = true;
+        boulder.receiveShadow = true;
+        boulderGroup.add(boulder);
+      }
     }
     scene.add(boulderGroup);
 
@@ -1777,7 +1837,154 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       }
     }
 
-    scene.add(habitatGroup);
+    if (isEarth) {
+      if (surfaceData.locationId === 'kennedy-space-center') {
+        // ── KENNEDY SPACE CENTER: LAUNCH COMPLEX 39A & ARTEMIS MOON ROCKET ──
+        const kscGroup = new THREE.Group();
+
+        // 1. Massive Launch Pad 39A Concrete Mount & Flame Trench
+        const padMountMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7, metalness: 0.2 });
+        const padMount = new THREE.Mesh(new THREE.BoxGeometry(22, 3.5, 22), padMountMat);
+        padMount.position.set(0, 1.75, 0);
+        padMount.receiveShadow = true;
+        padMount.castShadow = true;
+        kscGroup.add(padMount);
+
+        // Flame Trench Exhaust Channel
+        const trenchMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+        const trench = new THREE.Mesh(new THREE.BoxGeometry(24, 2.2, 6), trenchMat);
+        trench.position.set(0, 0.5, 0);
+        kscGroup.add(trench);
+
+        // Dual Crawlerway Approach Ramp
+        const crawlerwayMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.95 });
+        const ramp = new THREE.Mesh(new THREE.BoxGeometry(10, 1.2, 26), crawlerwayMat);
+        ramp.position.set(0, 0.4, 18);
+        ramp.rotation.x = 0.06;
+        kscGroup.add(ramp);
+
+        // 2. Mobile Launcher Service Tower (Red steel gantry truss)
+        const towerMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, metalness: 0.6, roughness: 0.4 });
+        const towerGeo = new THREE.BoxGeometry(3.6, 26, 3.6);
+        const tower = new THREE.Mesh(towerGeo, towerMat);
+        tower.position.set(-5.5, 15, -2);
+        tower.castShadow = true;
+        kscGroup.add(tower);
+
+        // Umbilical Swing Arms
+        const armMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8, roughness: 0.3 });
+        [8, 14, 20, 24].forEach((h) => {
+          const arm = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.6, 0.8), armMat);
+          arm.position.set(-3.2, h, -2);
+          kscGroup.add(arm);
+        });
+
+        // Lightning Protection Mast atop tower
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.25, 8, 8), armMat);
+        mast.position.set(-5.5, 32, -2);
+        kscGroup.add(mast);
+
+        // 3. ARTEMIS / SATURN MOON ROCKET (Standing tall on Pad 39A!)
+        const rocketGroup = new THREE.Group();
+        rocketGroup.position.set(0, 3.5, 0);
+
+        // Core Stage (Insulated orange cryogenic core)
+        const coreMat = new THREE.MeshStandardMaterial({ color: 0xe07a3f, roughness: 0.6 });
+        const core = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 18, 24), coreMat);
+        core.position.y = 9;
+        core.castShadow = true;
+        rocketGroup.add(core);
+
+        // Solid Rocket Boosters (White twin boosters)
+        const srbMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+        [-2.4, 2.4].forEach((bx) => {
+          const srb = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 16, 16), srbMat);
+          srb.position.set(bx, 8, 0);
+          srb.castShadow = true;
+          rocketGroup.add(srb);
+
+          const nose = new THREE.Mesh(new THREE.ConeGeometry(0.7, 2, 16), srbMat);
+          nose.position.set(bx, 17, 0);
+          rocketGroup.add(nose);
+        });
+
+        // Orion Spacecraft & Launch Abort System (LAS)
+        const orion = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.5, 24), srbMat);
+        orion.position.y = 19.2;
+        rocketGroup.add(orion);
+
+        const lasMast = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 4.5, 8), srbMat);
+        lasMast.position.y = 22.5;
+        rocketGroup.add(lasMast);
+
+        kscGroup.add(rocketGroup);
+
+        // 4. NASA Space Life Sciences Lab & Plant Growth Facility
+        const labMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.3, roughness: 0.4 });
+        const lab = new THREE.Mesh(new THREE.BoxGeometry(12, 3.2, 8), labMat);
+        lab.position.set(16, 1.6, -10);
+        lab.castShadow = true;
+        kscGroup.add(lab);
+
+        // NASA Blue Meatball Stripe
+        const stripeMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(12.1, 0.6, 0.1), stripeMat);
+        stripe.position.set(16, 2.2, -5.9);
+        kscGroup.add(stripe);
+
+        // American Flagpole
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 });
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 6, 8), poleMat);
+        pole.position.set(10, 3, 2);
+        kscGroup.add(pole);
+
+        const flagMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, side: THREE.DoubleSide });
+        const flag = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.0), flagMat);
+        flag.position.set(10.8, 5.4, 2);
+        kscGroup.add(flag);
+
+        scene.add(kscGroup);
+      } else if (surfaceData.locationId === 'mauna-kea') {
+        // ── MAUNA KEA: KECK OBSERVATORY TWIN DOMES ──
+        const maunaGroup = new THREE.Group();
+        const obsDomeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25, metalness: 0.1 });
+        [-7, 7].forEach((dx) => {
+          const obs = new THREE.Mesh(new THREE.SphereGeometry(4.5, 24, 18, 0, Math.PI * 2, 0, Math.PI / 2), obsDomeMat);
+          obs.position.set(dx, 0, 0);
+          obs.castShadow = true;
+          maunaGroup.add(obs);
+          const slit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4.6, 4.6), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+          slit.position.set(dx, 2.2, 0);
+          maunaGroup.add(slit);
+        });
+        scene.add(maunaGroup);
+      } else if (surfaceData.locationId === 'svalbard-vault') {
+        // ── SVALBARD GLOBAL SEED VAULT: CONCRETE ENTRANCE PORTAL ──
+        const svalbardGroup = new THREE.Group();
+        const portalMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.65, metalness: 0.2 });
+        const portal = new THREE.Mesh(new THREE.BoxGeometry(4.5, 7.5, 12), portalMat);
+        portal.position.set(0, 3.2, 0);
+        portal.rotation.x = 0.18;
+        portal.castShadow = true;
+        svalbardGroup.add(portal);
+
+        // Glowing turquoise fiber-optic artwork roof
+        const artMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
+        const art = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 8.5), artMat);
+        art.position.set(0, 6.8, 0);
+        art.rotation.x = -Math.PI / 2 + 0.18;
+        svalbardGroup.add(art);
+
+        const doorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8 });
+        const door = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.2), doorMat);
+        door.position.set(0, 1.6, 6.05);
+        svalbardGroup.add(door);
+
+        scene.add(svalbardGroup);
+      }
+    } else {
+      scene.add(habitatGroup);
+    }
 
     // ── 7C. High-Gain Communications Satellite Dish ───────────────────────────
     const commsGroup = new THREE.Group();
@@ -1850,9 +2057,21 @@ export const MarsSurfaceScene: React.FC<MarsSurfaceSceneProps> = ({
       roverGroup.add(headlight);
     });
 
-    roverGroup.position.set(12, 0, 7.5);
-    roverGroup.rotation.y = -Math.PI / 3.5;
-    scene.add(roverGroup);
+    if (isEarth) {
+      // NASA Crew Transport Van at Kennedy Space Center
+      const vanMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+      const van = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.5, 4.8), vanMat);
+      van.position.set(8, 0.9, 14);
+      roverGroup.add(van);
+      const stripeMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+      const vanStripe = new THREE.Mesh(new THREE.BoxGeometry(2.45, 0.25, 4.82), stripeMat);
+      vanStripe.position.set(8, 0.9, 14);
+      roverGroup.add(vanStripe);
+    } else {
+      roverGroup.position.set(12, 0, 7.5);
+      roverGroup.rotation.y = -Math.PI / 3.5;
+      scene.add(roverGroup);
+    }
 
     // ── 7D. Life-Support Utility Conduits on Ground ───────────────────────────
     const conduitMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
